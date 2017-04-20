@@ -63,6 +63,6 @@ public class Person {
 	
 	public long getSubjectReference()
 	{
-		
+		return 0;
 	}
 }

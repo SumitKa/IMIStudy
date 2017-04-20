@@ -20,10 +20,5 @@
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/Documents/HTW/FTP/baumeister/Master%20Programming/code/messenger-model/META-INF</locationURI>
 		</link>
-		<link>
-			<name>src/de</name>
-			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/Documents/HTW/FTP/baumeister/Master%20Programming/code/messenger-model/de</locationURI>
-		</link>
 	</linkedResources>
 </projectDescription>
