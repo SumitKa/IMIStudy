@@ -1,1 +1,1 @@
-# IMIStudy
+# IMIStudy Group
