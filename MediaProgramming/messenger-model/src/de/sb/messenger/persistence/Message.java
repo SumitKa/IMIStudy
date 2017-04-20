@@ -1,3 +1,4 @@
+package de.sb.messenger.persistence;
 import javax.validation.constraints.*;
 
 public class Message extends BaseEntity {

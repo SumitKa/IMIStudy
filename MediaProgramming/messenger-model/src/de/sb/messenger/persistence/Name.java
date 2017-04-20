@@ -1,3 +1,4 @@
+package de.sb.messenger.persistence;
 import javax.validation.constraints.*;
 
 public class Name {
@@ -10,8 +11,8 @@ public class Name {
 	
 	public Name(String given, String family)
 	{
-		this.given = given;
-		this.family = family;
+		this.setGiven(given);
+		this.setFamily(family);
 	}
 
 	public String getGiven() {

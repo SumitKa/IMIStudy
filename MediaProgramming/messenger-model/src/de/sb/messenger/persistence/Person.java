@@ -1,6 +1,8 @@
+package de.sb.messenger.persistence;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.List;
 
 import javax.validation.*;
 import javax.validation.constraints.*;
@@ -26,10 +28,14 @@ public class Person {
 	private Name name;
 	@Valid
 	private Adress adress;
-	
+	@Valid
 	private Document avatar;
-	private Message messageAuthored;
+	
+	@Min(0)
+	private List<Message> messageAuthored;
+	@Min(0)
 	private Person peopleOberserving;
+	@Min(0)
 	private Person peopleOberserved;
 	
 	public Person()
@@ -37,10 +43,17 @@ public class Person {
 		
 	}
 	
-	public byte[] passwordHash(String password) throws NoSuchProviderException, NoSuchAlgorithmException
+	public byte[] passwordHash(String password)
 	{
-		// TODO set passwordHash ?
-		this.passwortHash = MessageDigest.getInstance("UTF-8", password).digest();
+		try {
+			this.passwortHash = MessageDigest.getInstance("UTF-8", password).digest();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchProviderException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		return passwortHash;
 	}

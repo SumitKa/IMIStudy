@@ -1,3 +1,4 @@
+package de.sb.messenger.persistence;
 import javax.validation.constraints.*;
 
 public class Adress {
@@ -11,9 +12,11 @@ public class Adress {
 	@Size(min = 1, max = 63)
 	private String city;
 	
-	public Adress()
+	public Adress(String street, String postcode, String city)
 	{
-		
+		this.setStreet(street);
+		this.setPostcode(postcode);
+		this.setCity(city);
 	}
 
 	public String getStreet() {

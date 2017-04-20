@@ -1,6 +1,8 @@
+package de.sb.messenger.persistence;
 import java.lang.Comparable;
+import java.util.List;
 
-import com.sun.istack.internal.Nullable;
+import javax.validation.constraints.*;
 
 public class BaseEntity implements Comparable {
 
@@ -8,8 +10,8 @@ public class BaseEntity implements Comparable {
 	private int version;
 	private long creationTimestamp;
 	
-	@Nullable
-	private Message messageCaused;
+	@Min(0)
+	private List<Message> messageCaused;
 	
 	public BaseEntity()
 	{
@@ -32,5 +34,9 @@ public class BaseEntity implements Comparable {
 
 	public long getCreationTimestamp() {
 		return creationTimestamp;
+	}
+
+	public List<Message> getMessagesCaused() {
+		return messageCaused;
 	}
 }

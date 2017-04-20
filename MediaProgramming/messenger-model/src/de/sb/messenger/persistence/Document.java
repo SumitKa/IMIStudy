@@ -1,3 +1,4 @@
+package de.sb.messenger.persistence;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -13,7 +14,7 @@ public class Document extends BaseEntity {
 	@Size(min = 1, max = 16777215)
 	private byte content;
 	
-	public Document() throws NoSuchAlgorithmException
+	public Document()
 	{
 		try {
 			this.contentHash = MessageDigest.getInstance("SHA-256").digest();
@@ -23,7 +24,7 @@ public class Document extends BaseEntity {
 		}
 	}
 	
-	public byte mediaHash(byte conntent)
+	public static byte mediaHash(byte content)
 	{
 		return 0;
 	}

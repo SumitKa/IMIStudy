@@ -25,7 +25,6 @@ import de.sb.toolbox.Copyright;
 import de.sb.toolbox.net.RestCredentials;
 import de.sb.toolbox.net.RestJpaLifecycleProvider;
 
-
 /**
  * JAX-RS based REST service implementation for polymorphic entity resources. The following path and
  * method combinations are supported:
