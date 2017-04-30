@@ -4,22 +4,22 @@ import javax.validation.constraints.*;
 public class Name {
 
 	@Size(min = 1, max = 31)
+	@NotNull
 	private String given;
 	
 	@Size(min = 1, max = 31)
+	@NotNull
 	private String family;
 	
-	public Name(String given, String family)
-	{
-		this.setGiven(given);
-		this.setFamily(family);
+	protected Name() {
+		
 	}
 
 	public String getGiven() {
 		return given;
 	}
 
-	public void setGiven(@Size(min = 1, max = 31) String given) {
+	public void setGiven(String given) {
 		this.given = given;
 	}
 
@@ -27,7 +27,7 @@ public class Name {
 		return family;
 	}
 
-	public void setFamily(@Size(min = 1, max = 31) String family) {
+	public void setFamily(String family) {
 		this.family = family;
 	}
 }

@@ -1,27 +1,30 @@
 package de.sb.messenger.persistence;
 import java.lang.Comparable;
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.constraints.*;
 
-public class BaseEntity implements Comparable {
+public class BaseEntity implements Comparable<BaseEntity> {
 
+	@NotNull
 	private long identity;
+	@NotNull
 	private int version;
+	@NotNull
 	private long creationTimestamp;
 	
 	@Min(0)
-	private List<Message> messageCaused;
+	@NotNull
+	private Set<Message> messageCaused;
 	
-	public BaseEntity()
-	{
+	protected BaseEntity() {
 		
 	}
 	
 	@Override
-	public int compareTo(Object o) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int compareTo(BaseEntity o) {
+		return Long.compare(this.identity, o.identity);
 	}
 
 	public long getIdentity() {
@@ -36,7 +39,7 @@ public class BaseEntity implements Comparable {
 		return creationTimestamp;
 	}
 
-	public List<Message> getMessagesCaused() {
+	public Set<Message> getMessagesCaused() {
 		return messageCaused;
 	}
 }

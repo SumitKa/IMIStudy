@@ -4,13 +4,20 @@ import javax.validation.constraints.*;
 public class Adress {
 
 	@Size(min = 0, max = 63)
+	@NotNull
 	private String street;
 	
 	@Size(min = 0, max = 15) 
+	@NotNull
 	private String postcode;
 
 	@Size(min = 1, max = 63)
+	@NotNull
 	private String city;
+	
+	protected Adress() {
+		this(null, null, null);
+	}
 	
 	public Adress(String street, String postcode, String city)
 	{
@@ -23,7 +30,6 @@ public class Adress {
 		return street;
 	}
 
-	// TODO ??? @Size
 	public void setStreet(String street) {
 		this.street = street;
 	}

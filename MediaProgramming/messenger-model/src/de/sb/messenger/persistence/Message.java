@@ -3,17 +3,24 @@ import javax.validation.constraints.*;
 
 public class Message extends BaseEntity {
 
+	@NotNull
 	private final Person author;
+	@NotNull
 	private final BaseEntity subject;
 	
 	@Size(min = 1, max = 4093)
+	@NotNull
 	private String body;
+	
+	protected Message() {
+		this(null, null, null);
+	}
 	
 	public Message(Person author, BaseEntity subject, String body)
 	{
 		this.author = author;
 		this.subject = subject;
-		this.setBody(body);
+		this.body = body;
 	}
 
 	public Person getAuthor() {
@@ -34,6 +41,6 @@ public class Message extends BaseEntity {
 	
 	public long getAuthorReference()
 	{
-		return this.author.getSubjectReference();
+		return this.author == null ? 0 : this.author.getIdentity();
 	}
 }
