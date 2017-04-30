@@ -1,14 +1,12 @@
 package de.sb.messenger.persistence;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.List;
 
+import javax.persistence.*;
 import javax.validation.*;
 import javax.validation.constraints.*;
 
-public class Person extends BaseEntity {
+@Entity public class Person extends BaseEntity {
 
 	public static enum Group {
 		ADMIN,
@@ -31,6 +29,8 @@ public class Person extends BaseEntity {
 	@Valid
 	private Adress adress;
 	@Valid
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="Document", nullable=false)
 	private Document avatar;
 	
 	private List<Message> messageAuthored;

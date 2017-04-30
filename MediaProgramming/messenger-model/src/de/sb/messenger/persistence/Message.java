@@ -1,7 +1,8 @@
 package de.sb.messenger.persistence;
+import javax.persistence.Entity;
 import javax.validation.constraints.*;
 
-public class Message extends BaseEntity {
+@Entity public class Message extends BaseEntity {
 
 	@NotNull
 	private final Person author;

@@ -1,13 +1,15 @@
 package de.sb.messenger.persistence;
 import java.lang.Comparable;
-import java.util.List;
 import java.util.Set;
 
+import javax.persistence.*;
 import javax.validation.constraints.*;
 
-public class BaseEntity implements Comparable<BaseEntity> {
+@Entity public class BaseEntity implements Comparable<BaseEntity> {
 
 	@NotNull
+	@GeneratedValue
+	@Id
 	private long identity;
 	@NotNull
 	private int version;
