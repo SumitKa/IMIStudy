@@ -5,12 +5,12 @@ import java.util.Set;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 
-@Entity public class BaseEntity implements Comparable<BaseEntity> {
+@Entity 
+public class BaseEntity implements Comparable<BaseEntity> {
 
 	@NotNull
 	@GeneratedValue
-	@Id
-	private long identity;
+	@Id private long identity;
 	@NotNull
 	private int version;
 	@NotNull

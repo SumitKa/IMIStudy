@@ -37,7 +37,7 @@ import javax.validation.constraints.*;
 	private Person peopleOberserving;
 	private Person peopleOberserved;
 	
-	public Person() {
+	protected Person() {
 		
 	}
 	

@@ -1,8 +1,10 @@
 package de.sb.messenger.persistence;
 import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
 import javax.validation.constraints.*;
 
-@Embeddable public class Adress {
+@Embeddable 
+public class Adress {
 
 	@Size(min = 0, max = 63)
 	@NotNull
