@@ -15,12 +15,12 @@ public class PersonTest {
 	@BeforeClass
     public static void setUpClass() throws Exception {
         if (em == null) {
-            em = (EntityManager) Persistence.createEntityManagerFactory("testDocument").createEntityManager();
+            em = (EntityManager) Persistence.createEntityManagerFactory("testPerson").createEntityManager();
         }
     }
 	
 	@Test
-	public void checkDocument() {
+	public void checkPerson() {
 		em.getTransaction().begin();
 		
 		Person p1 = new Person();

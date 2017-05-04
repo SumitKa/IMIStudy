@@ -13,12 +13,12 @@ public class NameTest {
 	@BeforeClass
     public static void setUpClass() throws Exception {
         if (em == null) {
-            em = (EntityManager) Persistence.createEntityManagerFactory("testDocument").createEntityManager();
+            em = (EntityManager) Persistence.createEntityManagerFactory("testName").createEntityManager();
         }
     }
 	
 	@Test
-	public void checkDocument() {
+	public void checkName() {
 		em.getTransaction().begin();
 		
 		Name n1 = new Name();

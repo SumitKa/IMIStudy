@@ -13,12 +13,12 @@ public class MessageTest {
 	@BeforeClass
     public static void setUpClass() throws Exception {
         if (em == null) {
-            em = (EntityManager) Persistence.createEntityManagerFactory("testDocument").createEntityManager();
+            em = (EntityManager) Persistence.createEntityManagerFactory("testMessage").createEntityManager();
         }
     }
 	
 	@Test
-	public void checkDocument() {
+	public void checkMessage() {
 		em.getTransaction().begin();
 		
 		Message m1 = new Message();
