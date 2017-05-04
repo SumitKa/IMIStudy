@@ -1,4 +1,5 @@
 package de.sb.messenger.persistence;
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.validation.constraints.*;
@@ -8,14 +9,17 @@ public class Adress {
 
 	@Size(min = 0, max = 63)
 	@NotNull
+	@Column
 	private String street;
 	
 	@Size(min = 0, max = 15) 
 	@NotNull
+	@Column
 	private String postcode;
 
 	@Size(min = 1, max = 63)
 	@NotNull
+	@Column
 	private String city;
 	
 	protected Adress() {

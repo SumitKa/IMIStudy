@@ -1,16 +1,22 @@
 package de.sb.messenger.persistence;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.validation.constraints.*;
 
-@Entity public class Message extends BaseEntity {
+@Entity
+@Table
+public class Message extends BaseEntity {
 
 	@NotNull
 	private final Person author;
+	
 	@NotNull
 	private final BaseEntity subject;
 	
 	@Size(min = 1, max = 4093)
 	@NotNull
+	@Column
 	private String body;
 	
 	protected Message() {

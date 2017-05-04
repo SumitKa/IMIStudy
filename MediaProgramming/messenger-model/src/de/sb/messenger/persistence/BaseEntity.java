@@ -6,18 +6,27 @@ import javax.persistence.*;
 import javax.validation.constraints.*;
 
 @Entity 
+@Inheritance
 public class BaseEntity implements Comparable<BaseEntity> {
 
 	@NotNull
 	@GeneratedValue
-	@Id private long identity;
+	@Id 
+	@Column
+	private long identity;
+	
 	@NotNull
+	@Column
 	private int version;
+	
 	@NotNull
+	@Column
 	private long creationTimestamp;
 	
 	@Min(0)
 	@NotNull
+	@Column
+	@OneToMany
 	private Set<Message> messageCaused;
 	
 	protected BaseEntity() {
