@@ -7,44 +7,40 @@ import javax.persistence.Persistence;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.sb.messenger.persistence.Person.Group;
-
-public class PersonTest {
+public class MessageEntityTest {
 	private static EntityManager em = null;
 
 	@BeforeClass
     public static void setUpClass() throws Exception {
         if (em == null) {
-            em = (EntityManager) Persistence.createEntityManagerFactory("testPerson").createEntityManager();
+            em = (EntityManager) Persistence.createEntityManagerFactory("testMessage").createEntityManager();
         }
     }
 	
 	@Test
-	public void checkPerson() {
+	public void checkMessage() {
 		em.getTransaction().begin();
 		
-		Person p1 = new Person();
+		Message m1 = new Message();
 		
-		p1.setEmail("email");
-		p1.setGroup(Group.USER);
+		m1.setBody("body");
 		
-		em.persist(p1);
+		em.persist(m1);
 		em.flush();
 		
-		Person p2 = new Person();
+		Message m2 = new Message();
 		
-		p2.setEmail("email1");
-		p2.setGroup(Group.ADMIN);
+		m2.setBody("body1");
 		
-		em.persist(p2);
+		em.persist(m2);
 		em.flush();
 		
 		//em.find(Adress.class, )
 		
-		assertNotSame(p1, p2);
+		assertNotSame(m1, m2);
 		
-		em.remove(p1);
-		em.remove(p2);
+		em.remove(m1);
+		em.remove(m2);
 		
 		em.getTransaction().commit();
 	}

@@ -7,7 +7,7 @@ import javax.persistence.Persistence;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class DocumentTest {
+public class DocumentEntityTest {
 	private static EntityManager em = null;
 
 	@BeforeClass

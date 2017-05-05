@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 
 import javax.persistence.*;
 
-public class AdressTest {
+public class AdressEntityTest {
 	
 	private static EntityManager em = null;
 

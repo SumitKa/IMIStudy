@@ -7,7 +7,7 @@ import javax.persistence.Persistence;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class NameTest {
+public class NameEntityTest {
 	private static EntityManager em = null;
 
 	@BeforeClass
