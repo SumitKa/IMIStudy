@@ -7,27 +7,29 @@ import javax.persistence.Persistence;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class DocumentEntityTest {
-	private static EntityManager em = null;
+public class DocumentEntityTest extends EntityTest {
 
-	@BeforeClass
-    public static void setUpClass() throws Exception {
-        if (em == null) {
-            em = (EntityManager) Persistence.createEntityManagerFactory("testDocument").createEntityManager();
-        }
-    }
+	private static EntityManager em = null;
 	
 	@Test
-	public void checkDocument() {
-		em.getTransaction().begin();
+	public void testConstrains()
+	{
 		
-		Document d1 = new Document();
+	}
+	
+	@Test
+	public void testLifeCycle()
+	{
+		em = this.getEntityValidatorFactory().createEntityManager();
+		em.getTransition().begin();
 		
-		d1.setContent(new byte[0]);
-		d1.setContentHash(new byte[0]);
-		d1.setContentType("contentType");
+		Document entity = new Document();
 		
-		em.persist(d1);
+		entity.setContent(new byte[0]);
+		entity.setContentHash(new byte[0]);
+		entity.setContentType("contentType");
+		
+		em.persist(entity);
 		em.flush();
 		
 		Document d2 = new Document();
@@ -41,11 +43,15 @@ public class DocumentEntityTest {
 		
 		//em.find(Adress.class, )
 		
-		assertNotSame(d1, d2);
+		assertNotSame(entity, d2);
 		
-		em.remove(d1);
+		em.remove(entity);
 		em.remove(d2);
 		
 		em.getTransaction().commit();
+		
+		this.getWasteBasket().add(entity.getIdentity());
+		
+		em.close();
 	}
 }

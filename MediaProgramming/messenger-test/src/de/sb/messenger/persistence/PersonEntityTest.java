@@ -14,7 +14,11 @@ public class PersonEntityTest extends EntityTest {
 	@Test
 	public void testConstrains()
 	{
+		validator = this.getEntityValidatorFactory().getValidator();
 		
+		Person entity = new Person();
+		 
+		constraintViolations = validator.validate(entity);
 	}
 	
 	@Test
@@ -23,29 +27,29 @@ public class PersonEntityTest extends EntityTest {
 		em = this.getEntityValidatorFactory().createEntityManager();
 		em.getTransition().begin();
 		
-		Person p1 = new Person();
+		Person entity = new Person();
 		
-		p1.setEmail("email");
-		p1.setGroup(Group.USER);
+		entity.setEmail("email");
+		entity.setGroup(Group.USER);
 		
-		em.persist(p1);
+		em.persist(entity);
 		em.flush();
 		
-		Person p2 = new Person();
+		Person entity2 = new Person();
 		
-		p2.setEmail("email1");
-		p2.setGroup(Group.ADMIN);
+		entity2.setEmail("email1");
+		entity2.setGroup(Group.ADMIN);
 		
-		em.persist(p2);
+		em.persist(entity2);
 		//em.flush();
 		
 		//em.find(Adress.class, )
 		
-		assertNotSame(p1, p2);
+		assertNotSame(entity, entity2);
 		
 		em.getTransaction().commit();
 		
-		this.getWasteBasket().add(p1.getIdentity());
+		this.getWasteBasket().add(entity.getIdentity());
 		
 		em.close();
 	}

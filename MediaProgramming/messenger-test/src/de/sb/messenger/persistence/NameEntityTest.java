@@ -7,26 +7,28 @@ import javax.persistence.Persistence;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class NameEntityTest {
-	private static EntityManager em = null;
+public class NameEntityTest extends EntityTest {
 
-	@BeforeClass
-    public static void setUpClass() throws Exception {
-        if (em == null) {
-            em = (EntityManager) Persistence.createEntityManagerFactory("testName").createEntityManager();
-        }
-    }
+	private static EntityManager em = null;
 	
 	@Test
-	public void checkName() {
-		em.getTransaction().begin();
+	public void testConstrains()
+	{
 		
-		Name n1 = new Name();
+	}
+	
+	@Test
+	public void testLifeCycle()
+	{
+		em = this.getEntityValidatorFactory().createEntityManager();
+		em.getTransition().begin();
 		
-		n1.setFamily("family");
-		n1.setGiven("given");
+		Name entity = new Name();
 		
-		em.persist(n1);
+		entity.setFamily("family");
+		entity.setGiven("given");
+		
+		em.persist(entity);
 		em.flush();
 		
 		Name n2 = new Name();
@@ -39,11 +41,15 @@ public class NameEntityTest {
 		
 		//em.find(Adress.class, )
 		
-		assertNotSame(n1, n2);
+		assertNotSame(entity, n2);
 		
-		em.remove(n1);
+		em.remove(entity);
 		em.remove(n2);
 		
 		em.getTransaction().commit();
+		
+		this.getWasteBasket().add(entity.getIdentity());
+		
+		em.close();
 	}
 }

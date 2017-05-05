@@ -6,28 +6,29 @@ import static org.junit.Assert.*;
 
 import javax.persistence.*;
 
-public class AdressEntityTest {
+public class AdressEntityTest  extends EntityTest {
 	
 	private static EntityManager em = null;
-
-	@BeforeClass
-    public static void setUpClass() throws Exception {
-        if (em == null) {
-            em = (EntityManager) Persistence.createEntityManagerFactory("testAdress").createEntityManager();
-        }
-    }
 	
 	@Test
-	public void checkAdress() {
-		em.getTransaction().begin();
+	public void testConstrains()
+	{
 		
-		Adress ad1 = new Adress();
+	}
+	
+	@Test
+	public void testLifeCycle()
+	{
+		em = this.getEntityValidatorFactory().createEntityManager();
+		em.getTransition().begin();
 		
-		ad1.setStreet("street");
-		ad1.setPostcode("postcode");
-		ad1.setCity("city");
+		Adress entity = new Adress();
 		
-		em.persist(ad1);
+		entity.setStreet("street");
+		entity.setPostcode("postcode");
+		entity.setCity("city");
+		
+		em.persist(entity);
 		em.flush();
 		
 		Adress ad2 = new Adress();
@@ -41,11 +42,15 @@ public class AdressEntityTest {
 		
 		//em.find(Adress.class, )
 		
-		assertNotSame(ad1, ad2);
+		assertNotSame(entity, ad2);
 		
-		em.remove(ad1);
+		em.remove(entity);
 		em.remove(ad2);
 		
 		em.getTransaction().commit();
+		
+		this.getWasteBasket().add(entity.getIdentity());
+		
+		em.close();
 	}
 }

@@ -7,25 +7,27 @@ import javax.persistence.Persistence;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class MessageEntityTest {
-	private static EntityManager em = null;
+public class MessageEntityTest  extends EntityTest {
 
-	@BeforeClass
-    public static void setUpClass() throws Exception {
-        if (em == null) {
-            em = (EntityManager) Persistence.createEntityManagerFactory("testMessage").createEntityManager();
-        }
-    }
+	private static EntityManager em = null;
 	
 	@Test
-	public void checkMessage() {
-		em.getTransaction().begin();
+	public void testConstrains()
+	{
 		
-		Message m1 = new Message();
+	}
+	
+	@Test
+	public void testLifeCycle()
+	{
+		em = this.getEntityValidatorFactory().createEntityManager();
+		em.getTransition().begin();
 		
-		m1.setBody("body");
+		Message entity = new Message();
 		
-		em.persist(m1);
+		entity.setBody("body");
+		
+		em.persist(entity);
 		em.flush();
 		
 		Message m2 = new Message();
@@ -37,11 +39,15 @@ public class MessageEntityTest {
 		
 		//em.find(Adress.class, )
 		
-		assertNotSame(m1, m2);
+		assertNotSame(entity, m2);
 		
-		em.remove(m1);
+		em.remove(entity);
 		em.remove(m2);
 		
 		em.getTransaction().commit();
+		
+		this.getWasteBasket().add(entity.getIdentity());
+		
+		em.close();
 	}
 }

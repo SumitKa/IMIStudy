@@ -7,9 +7,9 @@ public class ValidatorFactory {
 		return new EntityManager();
 	}
 
-	public ??? getValidator() 
+	public Validator getValidator() 
 	{	
-		return null;
+		return new Validator();
 	}
 
 }
