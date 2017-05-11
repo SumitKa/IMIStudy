@@ -16,8 +16,10 @@ public class Name {
 	@Column
 	private String family;
 	
-	protected Name() {
+	public Name() {
 		
+		this.given = "";
+		this.family = "";
 	}
 
 	public String getGiven() {
