@@ -11,9 +11,9 @@ import javax.validation.constraints.*;
 public class BaseEntity implements Comparable<BaseEntity> {
 
 	@NotNull
-	@GeneratedValue(TODO)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Id 
-	@Column(nullable=false, insertable=false, updateable=false)
+	@Column(name = "id", nullable=false, insertable=false, updateable=false)
 	private long identity;
 	
 	@NotNull
