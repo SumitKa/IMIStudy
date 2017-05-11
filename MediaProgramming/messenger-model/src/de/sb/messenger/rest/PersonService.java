@@ -15,6 +15,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -117,10 +118,12 @@ public class PersonService {
     @GET
     @Path("{identity}/people")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
+    //TODO doppelt
     public Person queryPerson (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
+        //TODO 
         final Person entity = messengerManager.find(Person.class, identity, );
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
     }
@@ -147,6 +150,7 @@ public class PersonService {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
+        //TODO
         final Person entity = messengerManager.find(Person.class, identity, );
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
     }
@@ -166,10 +170,12 @@ public class PersonService {
     @GET
     @Path("{identity}/people/requester")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
+  //TODO
     public "" queryAuthenticatedRequester (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
+      //TODO
         final Person entity = messengerManager.find(Person.class, identity, );
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
     }
@@ -189,10 +195,12 @@ public class PersonService {
     @GET
     @Path("{identity}/people/{identity}")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
+  //TODO
     public Person queryPerson (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
+      //TODO
         final Person entity = messengerManager.find(Person.class, identity, );
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
     }
@@ -216,6 +224,7 @@ public class PersonService {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
+      //TODO
         final Person entity = messengerManager.find(Person.class, identity, );
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
     }
@@ -239,6 +248,7 @@ public class PersonService {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
+      //TODO
         final Person entity = messengerManager.find(Person.class, identity, );
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
     }
@@ -258,10 +268,12 @@ public class PersonService {
     @GET
     @Path("{identity}/people/{identity}/peopleObserved")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
+  //TODO
     public Person queryPeopleObserved (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
+      //TODO
         final Person entity = messengerManager.find(Person.class, identity, );
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
     }
@@ -282,10 +294,12 @@ public class PersonService {
     @PUT
     @Path("{identity}/people/{identity}/peopleObserved")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
+  //TODO
     public Person queryPeopleObserved (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
+      //TODO
         final Person entity = messengerManager.find(Person.class, identity, );
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
     }
@@ -308,10 +322,12 @@ public class PersonService {
     @GET
     @Path("{identity}/people/{identity}/avatar")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
+  //TODO
     public Document queryPeopleAvatar (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
+      //TODO
         final Person entity = messengerManager.find(Person.class, identity, );
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
     }
@@ -338,10 +354,12 @@ public class PersonService {
     @PUT
     @Path("{identity}/people/{identity}/avatar")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
+  //TODO
     public long queryPeopleAvatar (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
+      //TODO
         final Person entity = messengerManager.find(Person.class, identity, );
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
     }
