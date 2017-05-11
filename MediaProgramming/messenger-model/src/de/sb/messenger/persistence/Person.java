@@ -18,20 +18,16 @@ public class Person extends BaseEntity {
 		USER
 	}
 	
-	//TODO einfacher
-	@Pattern(regexp ="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\."
-	        +"[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@"
-	        +"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
-	             message="{invalid.email}")
+	@Pattern(regexp ="^(.+)@(.+)$", message="{invalid.email}")
 	@NotNull
-	@Column
+	@Column(name = "email", nullable=false, insertable=false, updateable=false)
 	private String email;
 	
-	@Column
+	@Column(name = "passHash", nullable=false, insertable=false, updateable=false)
 	private byte[] passHash;
 	
 	@Valid
-	@Column
+	@Column(name = "group", nullable=false, insertable=false, updateable=false)
 	@Enumerated
 	private Group group;
 	
@@ -48,15 +44,14 @@ public class Person extends BaseEntity {
 	@JoinColumn(name="Document", nullable=false)
 	private Document avatar;
 	
-	@Column
+	@Column(name = "messageAuthored", nullable=false, insertable=false, updateable=false)
 	@OneToMany
 	private List<Message> messageAuthored;
 	
-	// TODO ? muss hier ManyToMany oder OneToMany eingebaut werden?
-	@Column
+	@Column(name = "peopleOberserving", nullable=false, insertable=false, updateable=false)
 	private Person peopleOberserving;
 	
-	@Column
+	@Column(name = "peopleOberserved", nullable=false, insertable=false, updateable=false)
 	private Person peopleOberserved;
 	
 	public Person(final String email, final Document avatar) {
@@ -92,7 +87,6 @@ public class Person extends BaseEntity {
 		this.group = group;
 	}
 
-	
 	static public byte[] passwordHash(String password)
 	{
 		final byte[] passwordBytes = password.getBytes(StandardCharsets.UTF_8);

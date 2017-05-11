@@ -12,17 +12,17 @@ import org.eclipse.persistence.jpa.jpql.Assert;
 public class Document extends BaseEntity {
 
 	@NotNull
-	@Column
+	@Column(name = "contentHash", nullable=false, insertable=false, updateable=true)
 	private byte[] contentHash;
 	
 	@Size(min = 1, max = 63)
 	@NotNull
-	@Column
+	@Column(name = "contentType", nullable=false, insertable=false, updateable=true)
 	private String contentType;
 	
 	@Size(min = 1, max = 16777215)
 	@NotNull
-	@Column
+	@Column(name = "content", nullable=false, insertable=false, updateable=true)
 	private byte[] content;
 	
 	protected Document() {
@@ -37,7 +37,6 @@ public class Document extends BaseEntity {
 		Assert.isNotNull(content, "content is null or empty");
 		this.contentHash = mediaHash(content);
 	}
-	
 
 	public byte[] getContentHash() {
 		return contentHash;
@@ -62,8 +61,7 @@ public class Document extends BaseEntity {
 	public void setContent(byte[] content) {
 		this.content = content;
 	}
-	
-	
+
 	static public byte[] mediaHash(byte[] content)
 	{
 		try {
@@ -72,5 +70,4 @@ public class Document extends BaseEntity {
 			throw new AssertionError(e);
 		}
 	}
-	
 }

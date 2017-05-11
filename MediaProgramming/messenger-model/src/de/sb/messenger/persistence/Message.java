@@ -16,7 +16,7 @@ public class Message extends BaseEntity {
 	
 	@Size(min = 1, max = 4093)
 	@NotNull
-	@Column
+	@Column(name = "body", nullable=false, insertable=false, updateable=true)
 	private String body;
 	
 	protected Message() {

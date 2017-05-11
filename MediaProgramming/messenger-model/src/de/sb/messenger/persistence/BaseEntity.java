@@ -12,22 +12,22 @@ public class BaseEntity implements Comparable<BaseEntity> {
 
 	@NotNull
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Id 
-	@Column(name = "identity", nullable=false, insertable=false, updatable=false)
+	@Id
+	@Column(name = "identity", nullable=false, insertable=false, updateable=false)
 	private long identity;
 	
 	@NotNull
-	@Column
+	@Column(name = "version", nullable=false, insertable=false, updateable=true)
 	@Version
 	private int version;
 	
 	@NotNull
-	@Column
+	@Column(name = "creationTimestamp", nullable=false, insertable=false, updateable=false)
 	private long creationTimestamp;
 	
 	@Min(0)
 	@NotNull
-	@Column
+	@Column(name = "messageCaused", nullable=false, insertable=false, updateable=true)
 	@OneToMany
 	private Set<Message> messageCaused;
 	
