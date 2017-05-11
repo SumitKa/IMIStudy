@@ -124,12 +124,13 @@ public class MessageService {
     @PUT
     @Path("{identity}/message")
     @Produces({APPLICATION_JSON, APPLICATION_XML})
-    public long queryMessage(@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public long putMessage(@HeaderParam("Authorization") final String authentication, @PathParam("message")final Message entity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-        final Person entity = messengerManager.find(Person.class, identity, );
-        if (entity == null) throw new ClientErrorException(NOT_FOUND);
+        messengerManager.persist(entity);
+        
+        return entity.getIdentity();
     }
 
     /**
@@ -148,12 +149,14 @@ public class MessageService {
     @GET
     @Path("{identity}/message/{identity}")
     @Produces({APPLICATION_JSON, APPLICATION_XML})
-    public Message queryMessage(@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public Message getMessage(@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-        final Person entity = messengerManager.find(Person.class, identity, );
+        final Message entity = messengerManager.find(Message.class, identity);
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
+        
+        return entity;
     }
 
     /**
@@ -172,12 +175,14 @@ public class MessageService {
     @GET
     @Path("{identity}/message/{identity}/author")
     @Produces({APPLICATION_JSON, APPLICATION_XML})
-    public Person queryMessageAuthor(@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public Person getMessageAuthor(@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-        final Person entity = messengerManager.find(Person.class, identity, );
+        final Message entity = messengerManager.find(Message.class, identity);
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
+        
+        return entity.getAuthor();
     }
 
     /**
@@ -196,11 +201,13 @@ public class MessageService {
     @GET
     @Path("{identity}/message/{identity}/subject")
     @Produces({APPLICATION_JSON, APPLICATION_XML})
-    public long queryMessageSubject(@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public BaseEntity getMessageSubject(@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-        final Person entity = messengerManager.find(Person.class, identity, );
+        final Message entity = messengerManager.find(Message.class, identity);
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
+        
+        return entity.getSubject();
     }
 }

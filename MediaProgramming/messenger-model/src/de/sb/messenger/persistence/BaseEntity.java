@@ -5,9 +5,15 @@ import java.util.Set;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlType;
 
 @Entity 
 @Inheritance
+@XmlAccessorType (XmlAccessType.NONE)
+@XmlType
+@XmlSeeAlso(value = { Document.class, Message.class, Person.class })
 public class BaseEntity implements Comparable<BaseEntity> {
 
 	@NotNull

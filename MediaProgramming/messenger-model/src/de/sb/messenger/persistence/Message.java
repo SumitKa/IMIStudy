@@ -3,6 +3,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.*;
+import javax.xml.bind.annotation.XmlElement;
 
 @Entity
 @Table
@@ -17,6 +18,7 @@ public class Message extends BaseEntity {
 	@Size(min = 1, max = 4093)
 	@NotNull
 	@Column(name = "body", nullable=false, insertable=false, updatable=true)
+	@XmlElement
 	private String body;
 	
 	protected Message() {
@@ -34,6 +36,7 @@ public class Message extends BaseEntity {
 		return author;
 	}
 
+	@XmlElement
 	public BaseEntity getSubject() {
 		return subject;
 	}
@@ -46,6 +49,7 @@ public class Message extends BaseEntity {
 		this.body = body;
 	}
 	
+	@XmlElement
 	public long getAuthorReference()
 	{
 		return this.author == null ? 0 : this.author.getIdentity();

@@ -7,9 +7,18 @@ import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import java.util.Arrays;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 import javax.persistence.RollbackException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -19,8 +28,13 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+
+import org.eclipse.persistence.eis.interactions.QueryStringInteraction;
+
+import de.sb.messenger.persistence.Adress;
 import de.sb.messenger.persistence.BaseEntity;
 import de.sb.messenger.persistence.Message;
+import de.sb.messenger.persistence.Name;
 import de.sb.messenger.persistence.Person;
 import de.sb.toolbox.Copyright;
 import de.sb.toolbox.net.RestCredentials;
@@ -106,7 +120,9 @@ public class PersonService {
     /**
      * Returns the person matching the given criteria, with missing parameters identifying omitted criteria.
      * @param authentication the HTTP Basic "Authorization" header value
-     * @param identity the entity identity
+     * @param group the person group
+     * @param name the person name
+     * @param adress the person adress
      * @return the messages caused by the matching entity (HTTP 200)
      * @throws ClientErrorException (HTTP 400) if the given HTTP "Authorization" header is malformed
      * @throws ClientErrorException (HTTP 401) if authentication is lacking or invalid
@@ -118,23 +134,26 @@ public class PersonService {
     @GET
     @Path("{identity}/people")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
-    //TODO doppelt
-    public Person queryPerson (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public List<Person> getPersons (@HeaderParam("Authorization") final String authentication, 
+    		@PathParam("group") final Person.Group group, 
+    		@PathParam("name") final Name name, 
+    		@PathParam("adress") final Adress adress) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-        //TODO 
-        final Person entity = messengerManager.find(Person.class, identity, );
-        if (entity == null) throw new ClientErrorException(NOT_FOUND);
+        
+        //Query query = messengerManager.createQuery();
+        //return query.getResultList();
+        return null;
     }
 
     /**
      * Creates a new person if the given template's identity is zero,
      * or otherwise updates the corresponding person with the given template data.
-     * Optionally, a new password may be set using the header field “Set-Password”.
+     * Optionally, a new password may be set using the header field “Set-Password”. 
      * Returns the affected person's identity
      * @param authentication the HTTP Basic "Authorization" header value
-     * @param identity the entity identity
+     * @param person the entity
      * @return the messages caused by the matching entity (HTTP 200)
      * @throws ClientErrorException (HTTP 400) if the given HTTP "Authorization" header is malformed
      * @throws ClientErrorException (HTTP 401) if authentication is lacking or invalid
@@ -146,19 +165,33 @@ public class PersonService {
     @PUT
     @Path("{identity}/people")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
-    public long query (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public long putPerson (@HeaderParam("Authorization") final String authentication, 
+    		@PathParam("person")final Person entity, 
+    		@HeaderParam("Set-Password") final String setPassword) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-        //TODO
-        final Person entity = messengerManager.find(Person.class, identity, );
-        if (entity == null) throw new ClientErrorException(NOT_FOUND);
+        
+        if(setPassword != null)
+        {
+        	// TODO
+        }
+        
+        if(entity.getIdentity() == 0)
+        {
+        	messengerManager.persist(entity);
+        }
+        else
+        {
+        	messengerManager.refresh(entity);
+        }
+        
+        return entity.getIdentity();
     }
 
     /**
      * Returns the authenticated requester, which is useful for login operations.
      * @param authentication the HTTP Basic "Authorization" header value
-     * @param identity the entity identity
      * @return the messages caused by the matching entity (HTTP 200)
      * @throws ClientErrorException (HTTP 400) if the given HTTP "Authorization" header is malformed
      * @throws ClientErrorException (HTTP 401) if authentication is lacking or invalid
@@ -170,18 +203,15 @@ public class PersonService {
     @GET
     @Path("{identity}/people/requester")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
-  //TODO
-    public "" queryAuthenticatedRequester (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public Authenticator getAuthenticatedRequester (@HeaderParam("Authorization") final String authentication) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
-        final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-      //TODO
-        final Person entity = messengerManager.find(Person.class, identity, );
-        if (entity == null) throw new ClientErrorException(NOT_FOUND);
+        //TODO
+        return null;
     }
 
     /**
-     * Returns  the person matching the given identity.
+     * Returns the person matching the given identity.
      * @param authentication the HTTP Basic "Authorization" header value
      * @param identity the entity identity
      * @return the messages caused by the matching entity (HTTP 200)
@@ -195,20 +225,20 @@ public class PersonService {
     @GET
     @Path("{identity}/people/{identity}")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
-  //TODO
-    public Person queryPerson (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public Person getPerson (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-      //TODO
-        final Person entity = messengerManager.find(Person.class, identity, );
+        final Person entity = messengerManager.find(Person.class, identity);
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
+        
+        return entity;
     }
 
     /**
      * Returns the messages authored by the person matching the given identity.
      * @param authentication the HTTP Basic "Authorization" header value
-     * @param identity the entity identity
+     * @param identity the person identity
      * @return the messages caused by the matching entity (HTTP 200)
      * @throws ClientErrorException (HTTP 400) if the given HTTP "Authorization" header is malformed
      * @throws ClientErrorException (HTTP 401) if authentication is lacking or invalid
@@ -220,19 +250,22 @@ public class PersonService {
     @GET
     @Path("{identity}/people/{identity}/messagesAuthored")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
-    public Message queryMessageAuthored (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public List<Message> getMessageAuthored (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
+        // TODO
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-      //TODO
-        final Person entity = messengerManager.find(Person.class, identity, );
+        final Message entity = messengerManager.find(Message.class, identity);
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
+        
+        //entity.getAuthor().getIdentity() == identity
+        return null;
     }
 
     /**
      * Returns the people observing the person matching the given identity.
      * @param authentication the HTTP Basic "Authorization" header value
-     * @param identity the entity identity
+     * @param identity the person identity
      * @return the messages caused by the matching entity (HTTP 200)
      * @throws ClientErrorException (HTTP 400) if the given HTTP "Authorization" header is malformed
      * @throws ClientErrorException (HTTP 401) if authentication is lacking or invalid
@@ -244,19 +277,21 @@ public class PersonService {
     @GET
     @Path("{identity}/people/{identity}/peopleObserving")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
-    public Person queryPeopleObserving (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public List<Person> getPeopleObserving (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
+        //TODO
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-      //TODO
-        final Person entity = messengerManager.find(Person.class, identity, );
+        final Person entity = messengerManager.find(Person.class, identity);
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
+        
+        return null;
     }
 
     /**
      * Returns the people observed by the person matching the given identity.
      * @param authentication the HTTP Basic "Authorization" header value
-     * @param identity the entity identity
+     * @param identity the person identity
      * @return the messages caused by the matching entity (HTTP 200)
      * @throws ClientErrorException (HTTP 400) if the given HTTP "Authorization" header is malformed
      * @throws ClientErrorException (HTTP 401) if authentication is lacking or invalid
@@ -268,14 +303,15 @@ public class PersonService {
     @GET
     @Path("{identity}/people/{identity}/peopleObserved")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
-  //TODO
-    public Person queryPeopleObserved (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public List<Person> getPeopleObserved (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
+        // TODO
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-      //TODO
-        final Person entity = messengerManager.find(Person.class, identity, );
+        final Person entity = messengerManager.find(Person.class, identity);
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
+        
+        return null;
     }
 
     /**
@@ -294,13 +330,11 @@ public class PersonService {
     @PUT
     @Path("{identity}/people/{identity}/peopleObserved")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
-  //TODO
-    public Person queryPeopleObserved (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public void putPeopleObserved (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-      //TODO
-        final Person entity = messengerManager.find(Person.class, identity, );
+        final Person entity = messengerManager.find(Person.class, identity);
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
     }
 
@@ -310,7 +344,7 @@ public class PersonService {
      *   Hint: Use @Produces(WILDCARD) to declare production of an a priori unknown media type,
      *   and return an instance of Result that contains both the document's media type and it's content.
      * @param authentication the HTTP Basic "Authorization" header value
-     * @param identity the entity identity
+     * @param identity the person identity
      * @return the messages caused by the matching entity (HTTP 200)
      * @throws ClientErrorException (HTTP 400) if the given HTTP "Authorization" header is malformed
      * @throws ClientErrorException (HTTP 401) if authentication is lacking or invalid
@@ -322,19 +356,20 @@ public class PersonService {
     @GET
     @Path("{identity}/people/{identity}/avatar")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
-  //TODO
-    public Document queryPeopleAvatar (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public byte[] getPersonAvatar (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
+        // TODO 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-      //TODO
-        final Person entity = messengerManager.find(Person.class, identity, );
-        if (entity == null) throw new ClientErrorException(NOT_FOUND);
+        //final Document entity = messengerManager.find(Person.class, identity);
+        //if (entity == null) throw new ClientErrorException(NOT_FOUND);
+        
+        return null;
     }
 
     /**
      *    Updates the person's avatar (owner only), with the document content being passed as the HTTP request body,
-     *    and the media type passed as Header-Field “Content-type”.
+     *    and the media type passed as Header-Field “Content-type”. 
      *    If the given content is empty, the person's avatar is set to the default document (identity=1).
      *    Otherwise, if a document matching the media hash of the given content already exists,
      *    then this document becomes the person's avatar. Otherwise,
@@ -354,13 +389,11 @@ public class PersonService {
     @PUT
     @Path("{identity}/people/{identity}/avatar")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
-  //TODO
-    public long queryPeopleAvatar (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public void updatePersonAvatar (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-      //TODO
-        final Person entity = messengerManager.find(Person.class, identity, );
+        final Person entity = messengerManager.find(Person.class, identity);
         if (entity == null) throw new ClientErrorException(NOT_FOUND);
     }
 }

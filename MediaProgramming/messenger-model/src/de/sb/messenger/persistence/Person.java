@@ -7,6 +7,7 @@ import javax.persistence.*;
 import javax.validation.*;
 import javax.validation.constraints.*;
 import javax.validation.executable.ValidateOnExecution;
+import javax.xml.bind.annotation.XmlElement;
 
 import javafx.scene.Group;
 
@@ -21,6 +22,7 @@ public class Person extends BaseEntity {
 	@Pattern(regexp ="^(.+)@(.+)$", message="{invalid.email}")
 	@NotNull
 	@Column(name = "email", nullable=false, insertable=false, updatable=false)
+	@XmlElement
 	private String email;
 	
 	@Column(name = "passHash", nullable=false, insertable=false, updatable=false)
@@ -29,14 +31,17 @@ public class Person extends BaseEntity {
 	@Valid
 	@Column(name = "group", nullable=false, insertable=false, updatable=false)
 	@Enumerated
+	@XmlElement
 	private Group group;
 	
 	@Valid
 	@Embedded
+	@XmlElement
 	private Name name;
 	
 	@Valid
 	@Embedded
+	@XmlElement
 	private Adress adress;
 	
 	@Valid
@@ -49,9 +54,11 @@ public class Person extends BaseEntity {
 	private List<Message> messageAuthored;
 	
 	@Column(name = "peopleOberserving", nullable=false, insertable=false, updatable=false)
+	@XmlElement
 	private Person peopleOberserving;
 	
 	@Column(name = "peopleOberserved", nullable=false, insertable=false, updatable=false)
+	@XmlElement
 	private Person peopleOberserved;
 	
 	public Person(final String email, final Document avatar) {
