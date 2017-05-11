@@ -20,14 +20,14 @@ public class Person extends BaseEntity {
 	
 	@Pattern(regexp ="^(.+)@(.+)$", message="{invalid.email}")
 	@NotNull
-	@Column(name = "email", nullable=false, insertable=false, updateable=false)
+	@Column(name = "email", nullable=false, insertable=false, updatable=false)
 	private String email;
 	
-	@Column(name = "passHash", nullable=false, insertable=false, updateable=false)
+	@Column(name = "passHash", nullable=false, insertable=false, updatable=false)
 	private byte[] passHash;
 	
 	@Valid
-	@Column(name = "group", nullable=false, insertable=false, updateable=false)
+	@Column(name = "group", nullable=false, insertable=false, updatable=false)
 	@Enumerated
 	private Group group;
 	
@@ -44,21 +44,21 @@ public class Person extends BaseEntity {
 	@JoinColumn(name="Document", nullable=false)
 	private Document avatar;
 	
-	@Column(name = "messageAuthored", nullable=false, insertable=false, updateable=false)
+	@Column(name = "messageAuthored", nullable=false, insertable=false, updatable=false)
 	@OneToMany
 	private List<Message> messageAuthored;
 	
-	@Column(name = "peopleOberserving", nullable=false, insertable=false, updateable=false)
+	@Column(name = "peopleOberserving", nullable=false, insertable=false, updatable=false)
 	private Person peopleOberserving;
 	
-	@Column(name = "peopleOberserved", nullable=false, insertable=false, updateable=false)
+	@Column(name = "peopleOberserved", nullable=false, insertable=false, updatable=false)
 	private Person peopleOberserved;
 	
 	public Person(final String email, final Document avatar) {
 		this.name = new Name();
 		this.adress = new Adress();
 		this.group = Group.USER;
-		this.messageAuthored = Collections.emptySet();
+		this.messageAuthored = Collections.emptyList();
 		this.peopleOberserving = new Person();
 		this.peopleOberserved = new Person();
 		this.passHash = new byte[0];
