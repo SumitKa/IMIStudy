@@ -7,6 +7,9 @@ import org.junit.Test;
 
 import de.sb.messenger.persistence.Person.Group;
 
+import javax.persistence.EntityManager;
+import javax.validation.Validator;
+
 public class PersonEntityTest extends EntityTest {
 
 	private static EntityManager em = null;
@@ -14,7 +17,7 @@ public class PersonEntityTest extends EntityTest {
 	@Test
 	public void testConstrains()
 	{
-		validator = this.getEntityValidatorFactory().getValidator();
+		Validator validator = this.getEntityValidatorFactory().getValidator();
 		
 		Person entity = new Person();
 		 
