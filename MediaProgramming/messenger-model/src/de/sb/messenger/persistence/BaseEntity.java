@@ -13,7 +13,7 @@ public class BaseEntity implements Comparable<BaseEntity> {
 	@NotNull
 	@GeneratedValue(TODO)
 	@Id 
-	@Column nullbarkeit updatebarkeit insertbarkeit
+	@Column(nullable=false, insertable=false, updateable=false)
 	private long identity;
 	
 	@NotNull
