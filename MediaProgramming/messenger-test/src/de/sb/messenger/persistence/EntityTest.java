@@ -1,4 +1,6 @@
 package de.sb.messenger.persistence;
+import org.junit.BeforeClass;
+
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.metamodel.Metamodel;
@@ -134,8 +136,9 @@ public class EntityTest {
             return null;
         }
     };
-	
-	public EntityManagerFactory EntityManagerFactory()
+
+    @BeforeClass
+	public EntityManagerFactory getEntityManagerFactory()
 	{
 		return new EntityManagerFactory() {
             @Override
@@ -209,7 +212,8 @@ public class EntityTest {
             }
         };
 	}
-	
+
+    @BeforeClass
 	public ValidatorFactory getEntityValidatorFactory()
 	{
 		return new ValidatorFactory() {
