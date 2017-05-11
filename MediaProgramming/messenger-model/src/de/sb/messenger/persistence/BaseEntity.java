@@ -18,7 +18,7 @@ public class BaseEntity implements Comparable<BaseEntity> {
 
 	@NotNull
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Id 
+	@Id
 	@Column(name = "identity", nullable=false, insertable=false, updatable=false)
 	private long identity;
 	
