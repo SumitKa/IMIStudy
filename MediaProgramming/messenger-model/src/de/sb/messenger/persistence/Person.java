@@ -46,7 +46,7 @@ public class Person extends BaseEntity {
 	
 	@Valid
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="Document", nullable=false)
+	@JoinColumn(name="avatar", nullable=false)
 	private Document avatar;
 	
 	@Column(name = "messageAuthored", nullable=false, insertable=false, updatable=false)

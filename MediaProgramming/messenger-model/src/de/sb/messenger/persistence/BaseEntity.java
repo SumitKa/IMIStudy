@@ -23,7 +23,7 @@ public class BaseEntity implements Comparable<BaseEntity> {
 	private long identity;
 	
 	@NotNull
-	@Column(name = "version", nullable=false, insertable=false, updatable=true)
+	@Column(name = "version", nullable=false, insertable=false)
 	@Version
 	private int version;
 	
@@ -33,7 +33,7 @@ public class BaseEntity implements Comparable<BaseEntity> {
 	
 	@Min(0)
 	@NotNull
-	@Column(name = "messageCaused", nullable=false, insertable=false, updatable=true)
+	@Column(name = "messageCaused", nullable=false, insertable=false)
 	@OneToMany
 	private Set<Message> messageCaused;
 	

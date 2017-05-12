@@ -8,12 +8,12 @@ public class Name {
 
 	@Size(min = 1, max = 31)
 	@NotNull
-	@Column(name = "given", nullable=false, insertable=false, updatable=true)
+	@Column(name = "given", nullable=false, insertable=false)
 	private String given;
 	
 	@Size(min = 1, max = 31)
 	@NotNull
-	@Column(name = "family", nullable=false, insertable=false, updatable=true)
+	@Column(name = "family", nullable=false, insertable=false)
 	private String family;
 	
 	public Name() {

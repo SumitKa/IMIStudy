@@ -13,19 +13,19 @@ import org.eclipse.persistence.jpa.jpql.Assert;
 public class Document extends BaseEntity {
 
 	@NotNull
-	@Column(name = "contentHash", nullable=false, insertable=false, updatable=true)
+	@Column(name = "contentHash", nullable=false, insertable=false)
 	@XmlElement
 	private byte[] contentHash;
 	
 	@Size(min = 1, max = 63)
 	@NotNull
-	@Column(name = "contentType", nullable=false, insertable=false, updatable=true)
+	@Column(name = "contentType", nullable=false, insertable=false)
 	@XmlElement
 	private String contentType;
 	
 	@Size(min = 1, max = 16777215)
 	@NotNull
-	@Column(name = "content", nullable=false, insertable=false, updatable=true)
+	@Column(name = "content", nullable=false, insertable=false)
 	@XmlElement
 	private byte[] content;
 	

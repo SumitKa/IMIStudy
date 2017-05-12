@@ -17,7 +17,7 @@ public class Message extends BaseEntity {
 	
 	@Size(min = 1, max = 4093)
 	@NotNull
-	@Column(name = "body", nullable=false, insertable=false, updatable=true)
+	@Column(name = "body", nullable=false, insertable=false)
 	@XmlElement
 	private String body;
 	
