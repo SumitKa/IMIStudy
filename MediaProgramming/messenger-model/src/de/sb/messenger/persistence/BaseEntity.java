@@ -33,8 +33,8 @@ public class BaseEntity implements Comparable<BaseEntity> {
 	
 	@Min(0)
 	@NotNull
-	@Column(name = "messageCaused", nullable=false, insertable=false)
-	@OneToMany
+	@Column(name = "messageCaused", nullable=false, updatable=false, insertable=false)
+	@OneToMany(mappedBy = "author")
 	private Set<Message> messageCaused;
 	
 	public BaseEntity() {

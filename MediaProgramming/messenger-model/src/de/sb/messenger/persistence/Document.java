@@ -12,6 +12,8 @@ import org.eclipse.persistence.jpa.jpql.Assert;
 @PrimaryKeyJoinColumn
 public class Document extends BaseEntity {
 
+    static private final byte[] EMPTY_HASH = mediaHash(new byte[0]);
+
 	@NotNull
 	@Column(name = "contentHash", nullable=false, insertable=false)
 	@XmlElement
@@ -37,17 +39,11 @@ public class Document extends BaseEntity {
 	{
 		this.content = content;
 		this.contentType = contentType;
-		// TODO: behandeln falls content null -> so?
-		Assert.isNotNull(content, "content is null or empty");
-		this.contentHash = mediaHash(content);
+		this.contentHash = content == null ? EMPTY_HASH : mediaHash(content);
 	}
 
 	public byte[] getContentHash() {
 		return contentHash;
-	}
-
-	public void setContentHash(byte[] contentHash) {
-		this.contentHash = contentHash;
 	}
 
 	public String getContentType() {
@@ -64,6 +60,7 @@ public class Document extends BaseEntity {
 
 	public void setContent(byte[] content) {
 		this.content = content;
+		this.contentHash = mediaHash(content);
 	}
 
 	static public byte[] mediaHash(byte[] content)

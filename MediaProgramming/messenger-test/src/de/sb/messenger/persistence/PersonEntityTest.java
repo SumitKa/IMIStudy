@@ -29,7 +29,7 @@ public class PersonEntityTest extends EntityTest {
 	@Test
 	public void testLifeCycle()
 	{
-		em = this.getEntityManagerFactory().createEntityManager();
+		em = this.getFactory().createEntityManager();
 		em.getTransaction().begin();
 		
 		Person entity = new Person();
@@ -40,6 +40,11 @@ public class PersonEntityTest extends EntityTest {
 		em.persist(entity);
 		
 		em.getTransaction().commit();
+
+		final long id = entity.getIdentity();
+
+		em = this.getFactory().createEntityManager();
+		em.find(Person.class, id);
 		
 		this.getWasteBasket().add(entity.getIdentity());
 		

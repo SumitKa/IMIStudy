@@ -17,7 +17,6 @@ public class Name {
 	private String family;
 	
 	public Name() {
-		
 		this.given = "";
 		this.family = "";
 	}

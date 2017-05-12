@@ -9,23 +9,33 @@ import java.util.*;
 import java.util.List.*;
 
 public class EntityTest {
+	private EntityManagerFactory factory;
+	private ValidatorFactory validator;
+
 
 	private List<Long> wasteBasket = new ArrayList<Long>() {
 
     };
 
-    @BeforeClass
-	public EntityManagerFactory getEntityManagerFactory()
-	{
-        EntityManagerFactory factory = Persistence.createEntityManagerFactory("");
+    public EntityManagerFactory getFactory() {
         return factory;
+    }
+
+    public ValidatorFactory getValidator() {
+        return validator;
+    }
+
+
+    @BeforeClass
+	public void initEntityManagerFactory()
+	{
+        this.factory = Persistence.createEntityManagerFactory("messenger");
 	}
 
     @BeforeClass
-	public ValidatorFactory getEntityValidatorFactory()
+	public void initEntityValidatorFactory()
 	{
-	    ValidatorFactory validator = Validation.buildDefaultValidatorFactory();
-		return validator;
+		this.validator = Validation.buildDefaultValidatorFactory();
 	}
 	
 	public List<Long> getWasteBasket()

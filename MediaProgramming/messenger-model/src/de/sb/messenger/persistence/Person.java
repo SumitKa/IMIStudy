@@ -2,6 +2,7 @@ package de.sb.messenger.persistence;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.*;
 import javax.validation.*;
@@ -51,15 +52,21 @@ public class Person extends BaseEntity {
 	
 	@Column(name = "messageAuthored", nullable=false, insertable=false, updatable=false)
 	@OneToMany
+	//Sets + getter
 	private List<Message> messageAuthored;
 	
 	@Column(name = "peopleOberserving", nullable=false, insertable=false, updatable=false)
 	@XmlElement
-	private Person peopleOberserving;
+	@ManyToMany(mappedBy = "peopleObserved")
+	//getter
+	private Set<Person> peopleOberserving;
 	
 	@Column(name = "peopleOberserved", nullable=false, insertable=false, updatable=false)
 	@XmlElement
-	private Person peopleOberserved;
+	@ManyToMany
+	@JoinTable //TODO: (schema, name, etc.)
+	//getter ;
+	private Set<Person> peopleOberserved;
 	
 	public Person(final String email, final Document avatar) {
 		this.name = new Name();
