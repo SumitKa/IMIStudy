@@ -49,23 +49,20 @@ public class Person extends BaseEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="avatar", nullable=false)
 	private Document avatar;
-	
+
 	@Column(name = "messageAuthored", nullable=false, insertable=false, updatable=false)
 	@OneToMany
-	//Sets + getter
-	private List<Message> messageAuthored;
+	private Set<Message> messageAuthored;
 	
 	@Column(name = "peopleOberserving", nullable=false, insertable=false, updatable=false)
 	@XmlElement
 	@ManyToMany(mappedBy = "peopleObserved")
-	//getter
 	private Set<Person> peopleOberserving;
-	
+
 	@Column(name = "peopleOberserved", nullable=false, insertable=false, updatable=false)
 	@XmlElement
 	@ManyToMany
-	@JoinTable //TODO: (schema, name, etc.)
-	//getter ;
+	@JoinTable(schema = "peopleObserving", name = "", inverseJoinColumns = "", uniqueConstraints = "")
 	private Set<Person> peopleOberserved;
 	
 	public Person(final String email, final Document avatar) {
@@ -83,6 +80,18 @@ public class Person extends BaseEntity {
 	protected Person()
 	{
 		this(null, null);
+	}
+
+    public Set<Message> getMessageAuthored() {
+        return messageAuthored;
+    }
+
+	public Set<Person> getPeopleOberserving() {
+		return peopleOberserving;
+	}
+
+	public Set<Person> getPeopleOberserved() {
+		return peopleOberserved;
 	}
 	
 	public String getEmail() {

@@ -9,12 +9,12 @@ public class Message extends BaseEntity {
 
 	@NotNull
     @ManyToOne
-    @JoinColumn(name = "authorReference")
+    @JoinColumn(name = "authorReference", nullable = false, insertable = false, updatable = false)
 	private final Person author;
 	
 	@NotNull
     @ManyToOne
-    @JoinColumn(name = "subjectReference")
+    @JoinColumn(name = "subjectReference", nullable = false, insertable = false, updatable = false)
 	private final BaseEntity subject;
 	
 	@Size(min = 1, max = 4093)
