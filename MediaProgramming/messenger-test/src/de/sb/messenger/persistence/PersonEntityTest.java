@@ -19,7 +19,7 @@ public class PersonEntityTest extends EntityTest {
 	@Test
 	public void testConstrains()
 	{
-		Validator validator = this.getEntityValidatorFactory().getValidator();
+		Validator validator = this.getValidator().getValidator();
 		
 		Person entity = new Person();
 
