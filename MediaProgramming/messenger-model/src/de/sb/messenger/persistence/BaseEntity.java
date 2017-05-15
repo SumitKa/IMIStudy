@@ -1,5 +1,6 @@
 package de.sb.messenger.persistence;
 import java.lang.Comparable;
+import java.util.Collections;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -10,13 +11,14 @@ import javax.validation.constraints.*;
 public class BaseEntity implements Comparable<BaseEntity> {
 
 	@NotNull
-	@GeneratedValue
+	@GeneratedValue(TODO)
 	@Id 
-	@Column
+	@Column nullbarkeit updatebarkeit insertbarkeit
 	private long identity;
 	
 	@NotNull
 	@Column
+	@Version
 	private int version;
 	
 	@NotNull
@@ -29,8 +31,10 @@ public class BaseEntity implements Comparable<BaseEntity> {
 	@OneToMany
 	private Set<Message> messageCaused;
 	
-	protected BaseEntity() {
-		
+	public BaseEntity() {
+		this.version = 1;
+		this.creationTimestamp = System.currentTimeMillis();
+		this.messageCaused = Collections.emptySet();
 	}
 	
 	@Override
