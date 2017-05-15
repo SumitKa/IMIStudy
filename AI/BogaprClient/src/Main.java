@@ -168,38 +168,4 @@ public class Main
             throw new RuntimeException("", e);
         }
     }
-
-    private int[][] GetRandomFieldOfPlayer(Player player)
-    {
-        //List<int[][]> possibleFields = new List<int[][]>();
-
-        for(int x = 0; x < 12; x++)
-            for(int y = 0; y < 6; y++)
-            {
-                if(configuration[x][y].Player == player)
-                {
-                    return int[x][y];
-                }
-            }
-
-        return null;
-    }
-
-    private void SetStartConfiguration()
-    {
-        // blue
-        configuration[10][6] = new FieldConfiguration(3, Player.One);
-        configuration[11][6] = new FieldConfiguration(3, Player.One);
-        configuration[10][5] = new FieldConfiguration(3, Player.One);
-
-        // red
-        configuration[0][1] = new FieldConfiguration(3, Player.Two);
-        configuration[1][1] = new FieldConfiguration(3, Player.Two);
-        configuration[2][1] = new FieldConfiguration(3, Player.Two);
-
-        // green
-        configuration[5][0] = new FieldConfiguration(3, Player.Three);
-        configuration[1][6] = new FieldConfiguration(3, Player.Three);
-        configuration[2][6] = new FieldConfiguration(3, Player.Three);
-    }
 }
