@@ -1,19 +1,50 @@
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Callable;
 
-import javax.imageio.ImageIO;
 
 import lenz.htw.bogapr.Move;
 import lenz.htw.bogapr.net.NetworkClient;
 
 // java -Djava.library.path=lib/native -jar bogapr.jar
 
-public class Main
+public class Client implements Callable<NetworkClient>
 {
+    static private String hostName, teamName;
+    static private BufferedImage logo;
+
+    public Client(String hostName, String teamName, BufferedImage logo) {
+        this.hostName = hostName;
+        this.teamName = teamName;
+        this.logo = logo;
+    }
+
+    @Override
+    public NetworkClient call() throws Exception {
+        SetUpPitch();
+        PrintPitch();
+
+        NetworkClient networkClient = new NetworkClient(hostName, teamName, logo);
+
+        int latency = networkClient.getExpectedNetworkLatencyInMilliseconds();
+        int time = networkClient.getTimeLimitInSeconds();
+        int playerNumber = networkClient.getMyPlayerNumber();
+
+        for (;;) {
+            Move receiveMove;
+            while ((receiveMove = networkClient.receiveMove()) != null) {
+                Move(receiveMove);
+            }
+
+            Move move = GetValidMove(playerNumber + 1);
+            networkClient.sendMove(move);
+            Move(move);
+            PrintPitch();
+        }
+    }
+
     static class Field
     {
         public int X, Y, Count;
@@ -246,36 +277,5 @@ public class Main
     {
         int player = RemoveStone(move.fromX, move.fromY);
         AddStone(move.toX, move.toY, player);
-    }
-
-    public static void main(String[] args)
-    {
-        SetUpPitch();
-        PrintPitch();
-
-        try
-        {
-            NetworkClient networkClient = new NetworkClient(null, "CLIENT 0", ImageIO.read(new File("Content/logo.png")));
-
-            int latency = networkClient.getExpectedNetworkLatencyInMilliseconds();
-            int time = networkClient.getTimeLimitInSeconds();
-            int playerNumber = networkClient.getMyPlayerNumber();
-
-            for (;;) {
-                Move receiveMove;
-                while ((receiveMove = networkClient.receiveMove()) != null) {
-                    Move(receiveMove);
-                }
-
-                Move move = GetValidMove(playerNumber + 1);
-                networkClient.sendMove(move);
-                Move(move);
-                PrintPitch();
-            }
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("", e);
-        }
     }
 }
