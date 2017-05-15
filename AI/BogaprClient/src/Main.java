@@ -1,7 +1,9 @@
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -12,7 +14,7 @@ import lenz.htw.bogapr.net.NetworkClient;
 
 public class Main
 {
-    class Field
+    static class Field
     {
         public int X, Y, Count;
 
@@ -22,7 +24,7 @@ public class Main
         }
     }
 
-    // [y][x]
+    // [y][x] & einer = top stone
     static int[][]pitch = new int[7][];
 
     public static void SetUpPitch()
@@ -64,17 +66,21 @@ public class Main
         }
     }
 
-    public void AddStone(int x, int y, int player)
+    public static void AddStone(int x, int y, int player)
     {
-        pitch[y][x] = pitch[y][x] / 10 + player * 100;
+        pitch[y][x] = pitch[y][x] * 10 + player;
     }
 
-    public void RemoveStone(int x, int y)
+    public static int RemoveStone(int x, int y)
     {
-        //pitch[y][x] =
+        int player = GetTop(x, y);
+        pitch[y][x] = pitch[y][x] / 10;
+
+        return player;
     }
 
-    public List<Field> GetTops(int player)
+    // ggf. beim setzten direkt in einer liste abspeichern
+    public static List<Field> GetTops(int player)
     {
         List<Field> tops = new ArrayList<>();
 
@@ -92,38 +98,154 @@ public class Main
         return tops;
     }
 
-    public int GetTop(int x, int y)
+    public static int GetTop(int x, int y)
     {
-        return pitch[y][x] / 100;
+        return pitch[y][x] % 10;
     }
 
-
-    public int GetCount(int x, int y)
+    // teuer -> direkt beim setzten merken
+    public static int GetCount(int x, int y)
     {
+        int pitchInt = pitch[y][x];
+        int count = 0;
 
- //       int player = fieldInt / 100;
-   //     int position = 0;
-//
-//        if(player != 0)
-//        {
-//            position++;
-//
-//            if(fieldInt % 100 / 10 != 0)
-//            {
-//                position++;
-//                if(fieldInt % 100 % 10 != 0)
-//                {
-//                    position++;
-//                }
-//            }
-//        }
-//        return fieldCountd
-        return 0;
+        if(pitchInt % 10 != 0)
+        {
+            count++;
+            if(pitchInt % 100 != 0)
+            {
+                count++;
+                if(pitchInt / 100 != 0)
+                    count++;
+            }
+        }
+
+        return count;
+    }
+
+    public static boolean HasMax(int x, int y)
+    {
+        return pitch[y][x] / 100 != 0;
+    }
+
+    public static boolean IsMax(int fieldInt)
+    {
+        return fieldInt / 100 != 0;
     }
 
     public static Move GetValidMove(int player)
     {
-        return new Move(0, 0, 0, 0);
+        List<Field> tops = GetTops(player);
+        List<Move> validMoves = GetValidMoves(tops);
+
+        Random random = new Random();
+        // funktioniert random so???
+        return validMoves.get(random.nextInt(validMoves.size()));
+    }
+
+    public static List<Move> GetValidMoves(List<Field> tops)
+    {
+        List<Move> moves = new ArrayList<>();
+
+        for(int i = 0; i < tops.size(); i++)
+        {
+            Field field = tops.get(i);
+
+            moves.addAll(GetValidMoves(field));
+        }
+
+        return  moves;
+    }
+
+    public static List<Move> GetValidMoves(Field field)
+    {
+        int x = field.X, y = field.Y;
+
+        List<Move> moves = new ArrayList<>();
+
+        switch(field.Count) {
+            case 1:
+                if (x > 0 && HasMax(x-1, y))
+                    moves.add(new Move(x, y, x-1, y));
+                if (x < pitch[y].length - 1 && HasMax(x+1, y))
+                    moves.add(new Move(x, y, x+1, y));
+                if (x % 2 != 0 && y > 1 && HasMax(x-1, y-1))
+                    moves.add(new Move(x, y, x-1, y-1));
+                if (x % 2 == 0 && y < pitch.length - 1 && HasMax(x+1, y+1))
+                    moves.add(new Move(x, y, x+1, y+1));
+            case 2:
+                if (x > 1 && HasMax(x-2, y))
+                    moves.add(new Move(x, y, x-2, y));
+                if (x < pitch[y].length - 2 && HasMax(x+2, y))
+                    moves.add(new Move(x, y, x+2, y));
+                if(y > 1) {
+                    if (HasMax(x, y-1))
+                        moves.add(new Move(x, y, x, y-1));
+                    if (x > 1 && HasMax(x-2, y-1))
+                        moves.add(new Move(x, y, x-2, y-1));
+                }
+                if(y < pitch.length - 1) {
+                    if (HasMax(x, y++))
+                        moves.add(new Move(x, y, x, y++));
+                    if (HasMax(x + 2, y++))
+                        moves.add(new Move(x, y, x + 2, y++));
+                }
+            case 3:
+                if (x > 2 && HasMax(x-3, y))
+                    moves.add(new Move(x, y, x-3, y));
+                if (x < pitch[y].length - 3 && HasMax(x+3, y))
+                    moves.add(new Move(x, y, x+3, y));
+                if(x % 2 != 0)
+                {
+                    // TODO....
+//                    if (y > 1 && HasMax(x, y--))
+//                        moves.add(new Move(x, y, x, y--));
+//                    if (y > 1 && HasMax(x - 2, y--))
+//                        moves.add(new Move(x, y, x - 2, y--));
+//                    if (y < pitch.length - 1 && HasMax(x, y++))
+//                        moves.add(new Move(x, y, x, y++));
+//                    if (y < pitch.length - 1 && HasMax(x + 2, y++))
+//                        moves.add(new Move(x, y, x + 2, y++));
+//                    if (y > 1 && HasMax(x - 2, y--))
+//                        moves.add(new Move(x, y, x - 2, y--));
+//                    if (y < pitch.length - 1 && HasMax(x, y++))
+//                        moves.add(new Move(x, y, x, y++));
+//                    if (y < pitch.length - 1 && HasMax(x + 2, y++))
+//                        moves.add(new Move(x, y, x + 2, y++));
+                }
+                else
+                {
+                    if (y > 1) {
+                        if (x > 2 && HasMax(x - 3, y - 1))
+                            moves.add(new Move(x, y, x - 3, y - 1));
+                        if (x < pitch[y].length - 3 && HasMax(x + 1, y - 1))
+                            moves.add(new Move(x, y, x + 1, y - 1));
+                    }
+                    if(y > 2)
+                    {
+                        if (x > 2 && HasMax(x - 3, y - 2))
+                            moves.add(new Move(x, y, x - 3, y - 2));
+                        if (x < pitch[y].length - 3 && HasMax(x - 1, y - 2))
+                            moves.add(new Move(x, y, x - 1, y - 2));
+                    }
+                    if(y < pitch.length - 1)
+                    {
+                        if (HasMax(x - 1, y + 1))
+                            moves.add(new Move(x, y, x - 1, y + 1));
+                        if (HasMax(x + 1, y + 1))
+                            moves.add(new Move(x, y, x + 1, y + 1));
+                        if (HasMax(x +3, y +1))
+                            moves.add(new Move(x, y, x +3, y +1));
+                    }
+                }
+        }
+        return moves;
+    }
+
+    public static void Move(Move move)
+    {
+        int player = RemoveStone(move.fromX, move.fromY);
+        AddStone(move.toX, move.toY, player);
     }
 
     public static void main(String[] args)
@@ -142,25 +264,13 @@ public class Main
             for (;;) {
                 Move receiveMove;
                 while ((receiveMove = networkClient.receiveMove()) != null) {
-                    //Zug in meine Brettrepräsentation einarbeiten
+                    Move(receiveMove);
                 }
-                //berechne tollen Zug
 
-
-                networkClient.sendMove(new Move(1, 1, 0, 2));
-
-//                if(playerNumber == 0)
-//                {
-//                    networkClient.sendMove(new Move(0, 1, 1, 3));//5, 6, 2, 6));
-//                }
-//                else if(playerNumber == 1)
-//                {
-//                    networkClient.sendMove(new Move(0, 1, 1, 3));
-//                }
-//                else
-//                {
-//                    networkClient.sendMove(new Move(0, 1, 1, 3));
-//                }
+                Move move = GetValidMove(playerNumber + 1);
+                networkClient.sendMove(move);
+                Move(move);
+                PrintPitch();
             }
         }
         catch (IOException e)
