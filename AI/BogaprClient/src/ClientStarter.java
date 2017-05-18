@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 public class ClientStarter {
     private static final String HOST_NAME = null;
     private static final String[] TEAM_NAME = {"GamerOne", "GamerTwo", "GamerThree"};
-    private static final String[] LOGO_PATH = {"BogaprClient/resources/logo.png", "BogaprClient/resources/logo2.png", "BogaprClient/resources/logo3.png"};
+    private static final String[] LOGO_PATH = {"resources/logo.png", "resources/logo2.png", "resources/logo3.png"};
 
     public static void main(String[] args) {
         BufferedImage logo;

@@ -1,10 +1,12 @@
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
 
+import com.sun.jmx.snmp.Enumerated;
 import lenz.htw.bogapr.Move;
 import lenz.htw.bogapr.net.NetworkClient;
 
@@ -35,8 +37,12 @@ public class Client implements Callable<NetworkClient>
         for (;;) {
             Move receiveMove;
             while ((receiveMove = networkClient.receiveMove()) != null) {
+                // TODO ???
                 Move(receiveMove);
+                System.out.print("enemy");
             }
+            // TODO !!! startet mehrmals die suche... nur einmal starten
+            System.out.print("me");
 
             Move move = GetValidMove(playerNumber + 1);
             networkClient.sendMove(move);
@@ -45,7 +51,7 @@ public class Client implements Callable<NetworkClient>
         }
     }
 
-    static class Field
+    private class Field
     {
         public int X, Y, Count;
 
@@ -58,7 +64,7 @@ public class Client implements Callable<NetworkClient>
     // [y][x] & einer = top stone
     static int[][]pitch = new int[7][];
 
-    public static void SetUpPitch()
+    public void SetUpPitch()
     {
         for (int y = 0; y <= 6; y++)
         {
@@ -77,32 +83,41 @@ public class Client implements Callable<NetworkClient>
         SetUpPlayer();
     }
 
-    public static void SetUpPlayer()
+    public void SetUpPlayer()
     {
         pitch[1][0] = pitch[1][1] = pitch[1][2] = 111;
         pitch[5][0] = pitch[6][1] = pitch[6][2] = 222;
         pitch[5][10] = pitch[6][10] = pitch[6][11] = 333;
     }
 
-    public static void PrintPitch()
+    public void PrintPitch()
     {
+        StringBuilder stringBuilder = new StringBuilder();
+
         for(int y = pitch.length - 1; y >= 0; y--)
         {
             for(int x = 0; x < pitch[y].length; x++)
             {
-                System.out.print("[" + pitch[y][x] + "]");
+                stringBuilder.append("[" + pitch[y][x] + "]");
             }
-
-            System.out.println();
+            stringBuilder.append("\n");
         }
+
+        System.out.println(stringBuilder);
     }
 
-    public static void AddStone(int x, int y, int player)
+    public void Move(Move move)
+    {
+        int player = RemoveStone(move.fromX, move.fromY);
+        AddStone(move.toX, move.toY, player);
+    }
+
+    public void AddStone(int x, int y, int player)
     {
         pitch[y][x] = pitch[y][x] * 10 + player;
     }
 
-    public static int RemoveStone(int x, int y)
+    public int RemoveStone(int x, int y)
     {
         int player = GetTop(x, y);
         pitch[y][x] = pitch[y][x] / 10;
@@ -111,7 +126,7 @@ public class Client implements Callable<NetworkClient>
     }
 
     // ggf. beim setzten direkt in einer liste abspeichern
-    public static List<Field> GetTops(int player)
+    public List<Field> GetTops(int player)
     {
         List<Field> tops = new ArrayList<>();
 
@@ -129,13 +144,13 @@ public class Client implements Callable<NetworkClient>
         return tops;
     }
 
-    public static int GetTop(int x, int y)
+    public int GetTop(int x, int y)
     {
         return pitch[y][x] % 10;
     }
 
     // teuer -> direkt beim setzten merken
-    public static int GetCount(int x, int y)
+    public int GetCount(int x, int y)
     {
         int pitchInt = pitch[y][x];
         int count = 0;
@@ -154,17 +169,17 @@ public class Client implements Callable<NetworkClient>
         return count;
     }
 
-    public static boolean HasMax(int x, int y)
+    public boolean HasNotMax(int x, int y)
     {
-        return pitch[y][x] / 100 != 0;
+        return pitch[y][x] / 100 == 0;
     }
 
-    public static boolean IsMax(int fieldInt)
+    public boolean IsMax(int fieldInt)
     {
         return fieldInt / 100 != 0;
     }
 
-    public static Move GetValidMove(int player)
+    public Move GetValidMove(int player)
     {
         List<Field> tops = GetTops(player);
         List<Move> validMoves = GetValidMoves(tops);
@@ -174,7 +189,7 @@ public class Client implements Callable<NetworkClient>
         return validMoves.get(random.nextInt(validMoves.size()));
     }
 
-    public static List<Move> GetValidMoves(List<Field> tops)
+    public List<Move> GetValidMoves(List<Field> tops)
     {
         List<Move> moves = new ArrayList<>();
 
@@ -188,7 +203,7 @@ public class Client implements Callable<NetworkClient>
         return  moves;
     }
 
-    public static List<Move> GetValidMoves(Field field)
+    public List<Move> GetValidMoves(Field field)
     {
         int x = field.X, y = field.Y;
 
@@ -196,86 +211,82 @@ public class Client implements Callable<NetworkClient>
 
         switch(field.Count) {
             case 1:
-                if (x > 0 && HasMax(x-1, y))
+                if (x > 0 && HasNotMax(x-1, y))
                     moves.add(new Move(x, y, x-1, y));
-                if (x < pitch[y].length - 1 && HasMax(x+1, y))
+                if (x < pitch[y].length - 1 && HasNotMax(x+1, y))
                     moves.add(new Move(x, y, x+1, y));
-                if (x % 2 != 0 && y > 1 && HasMax(x-1, y-1))
+                if (x % 2 != 0 && y > 1 && HasNotMax(x-1, y-1))
                     moves.add(new Move(x, y, x-1, y-1));
-                if (x % 2 == 0 && y < pitch.length - 1 && HasMax(x+1, y+1))
+                if (x % 2 == 0 && y < pitch.length - 1 && HasNotMax(x+1, y+1))
                     moves.add(new Move(x, y, x+1, y+1));
             case 2:
-                if (x > 1 && HasMax(x-2, y))
+                if (x > 1 && HasNotMax(x-2, y))
                     moves.add(new Move(x, y, x-2, y));
-                if (x < pitch[y].length - 2 && HasMax(x+2, y))
+                if (x < pitch[y].length - 2 && HasNotMax(x+2, y))
                     moves.add(new Move(x, y, x+2, y));
                 if(y > 1) {
-                    if (HasMax(x, y-1))
+                    if (HasNotMax(x, y-1))
                         moves.add(new Move(x, y, x, y-1));
-                    if (x > 1 && HasMax(x-2, y-1))
+                    if (x > 1 && HasNotMax(x-2, y-1))
                         moves.add(new Move(x, y, x-2, y-1));
                 }
                 if(y < pitch.length - 1) {
-                    if (HasMax(x, y++))
-                        moves.add(new Move(x, y, x, y++));
-                    if (HasMax(x + 2, y++))
-                        moves.add(new Move(x, y, x + 2, y++));
+                    if (HasNotMax(x, y + 1))
+                        moves.add(new Move(x, y, x, y + 1));
+                    if (HasNotMax(x + 2, y + 1))
+                        moves.add(new Move(x, y, x + 2, y + 1));
                 }
             case 3:
-                if (x > 2 && HasMax(x-3, y))
+                if (x > 2 && HasNotMax(x-3, y))
                     moves.add(new Move(x, y, x-3, y));
-                if (x < pitch[y].length - 3 && HasMax(x+3, y))
+                if (x < pitch[y].length - 3 && HasNotMax(x+3, y))
                     moves.add(new Move(x, y, x+3, y));
+
+                if (y > 1) {
+                    if (x > 2 && HasNotMax(x - 3, y - 1))
+                        moves.add(new Move(x, y, x - 3, y - 1));
+                    if (x < pitch[y].length - 3 && HasNotMax(x + 1, y - 1))
+                        moves.add(new Move(x, y, x + 1, y - 1));
+                }
+                if(y < pitch.length - 1) {
+                    if (x > 1 && HasNotMax(x - 1, y + 1))
+                        moves.add(new Move(x, y, x - 1, y + 1));
+                    if (x < pitch[y].length - 2 && HasNotMax(x + 3, y  + 1))
+                        moves.add(new Move(x, y, x + 3, y + 1));
+                }
+
+                //int step = x % 2 != 0 ? -1 : 1;
+
                 if(x % 2 != 0)
                 {
-                    // TODO....
-//                    if (y > 1 && HasMax(x, y--))
-//                        moves.add(new Move(x, y, x, y--));
-//                    if (y > 1 && HasMax(x - 2, y--))
-//                        moves.add(new Move(x, y, x - 2, y--));
-//                    if (y < pitch.length - 1 && HasMax(x, y++))
-//                        moves.add(new Move(x, y, x, y++));
-//                    if (y < pitch.length - 1 && HasMax(x + 2, y++))
-//                        moves.add(new Move(x, y, x + 2, y++));
-//                    if (y > 1 && HasMax(x - 2, y--))
-//                        moves.add(new Move(x, y, x - 2, y--));
-//                    if (y < pitch.length - 1 && HasMax(x, y++))
-//                        moves.add(new Move(x, y, x, y++));
-//                    if (y < pitch.length - 1 && HasMax(x + 2, y++))
-//                        moves.add(new Move(x, y, x + 2, y++));
+                    if (y > 1) {
+                        if (HasNotMax(x - 1, y - 1))
+                            moves.add(new Move(x, y, x - 1, y - 1));
+                    }
+                    if(y < pitch.length - 2)
+                    {
+                        if (HasNotMax(x + 1, y  + 2))
+                            moves.add(new Move(x, y, x  + 1, y + 2));
+                        if (HasNotMax(x + 3, y + 2))
+                            moves.add(new Move(x, y, x + 3, y + 2));
+                    }
                 }
                 else
                 {
-                    if (y > 1) {
-                        if (x > 2 && HasMax(x - 3, y - 1))
-                            moves.add(new Move(x, y, x - 3, y - 1));
-                        if (x < pitch[y].length - 3 && HasMax(x + 1, y - 1))
-                            moves.add(new Move(x, y, x + 1, y - 1));
-                    }
                     if(y > 2)
                     {
-                        if (x > 2 && HasMax(x - 3, y - 2))
+                        if (x > 2 && HasNotMax(x - 3, y - 2))
                             moves.add(new Move(x, y, x - 3, y - 2));
-                        if (x < pitch[y].length - 3 && HasMax(x - 1, y - 2))
+                        if (x < pitch[y].length - 3 && HasNotMax(x - 1, y - 2))
                             moves.add(new Move(x, y, x - 1, y - 2));
                     }
                     if(y < pitch.length - 1)
                     {
-                        if (HasMax(x - 1, y + 1))
-                            moves.add(new Move(x, y, x - 1, y + 1));
-                        if (HasMax(x + 1, y + 1))
+                        if (HasNotMax(x + 1, y + 1))
                             moves.add(new Move(x, y, x + 1, y + 1));
-                        if (HasMax(x +3, y +1))
-                            moves.add(new Move(x, y, x +3, y +1));
                     }
                 }
         }
         return moves;
-    }
-
-    public static void Move(Move move)
-    {
-        int player = RemoveStone(move.fromX, move.fromY);
-        AddStone(move.toX, move.toY, player);
     }
 }
