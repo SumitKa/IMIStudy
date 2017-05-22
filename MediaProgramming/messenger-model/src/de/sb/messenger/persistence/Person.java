@@ -2,13 +2,11 @@ package de.sb.messenger.persistence;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.*;
 import javax.validation.*;
 import javax.validation.constraints.*;
 import javax.validation.executable.ValidateOnExecution;
-import javax.xml.bind.annotation.XmlElement;
 
 import javafx.scene.Group;
 
@@ -20,56 +18,52 @@ public class Person extends BaseEntity {
 		USER
 	}
 	
-	@Pattern(regexp ="^(.+)@(.+)$", message="{invalid.email}")
+	//TODO einfacher
+	@Pattern(regexp ="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\."
+	        +"[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@"
+	        +"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
+	             message="{invalid.email}")
 	@NotNull
-	@Column(name = "email", nullable=false, insertable=false, updatable=false)
-	@XmlElement
+	@Column
 	private String email;
 	
-	@Column(name = "passHash", nullable=false, insertable=false, updatable=false)
+	@Column
 	private byte[] passHash;
 	
 	@Valid
-	@Column(name = "group", nullable=false, insertable=false, updatable=false)
+	@Column
 	@Enumerated
-	@XmlElement
 	private Group group;
 	
 	@Valid
 	@Embedded
-	@XmlElement
 	private Name name;
 	
 	@Valid
 	@Embedded
-	@XmlElement
 	private Adress adress;
 	
 	@Valid
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="avatar", nullable=false)
+	@JoinColumn(name="Document", nullable=false)
 	private Document avatar;
-
-	@Column(name = "messageAuthored", nullable=false, insertable=false, updatable=false)
-	@OneToMany
-	private Set<Message> messageAuthored;
 	
-	@Column(name = "peopleOberserving", nullable=false, insertable=false, updatable=false)
-	@XmlElement
-	@ManyToMany(mappedBy = "peopleObserved")
-	private Set<Person> peopleOberserving;
-
-	@Column(name = "peopleOberserved", nullable=false, insertable=false, updatable=false)
-	@XmlElement
-	@ManyToMany
-	@JoinTable(schema = "peopleObserving", name = "", inverseJoinColumns = "", uniqueConstraints = "")
-	private Set<Person> peopleOberserved;
+	@Column
+	@OneToMany
+	private List<Message> messageAuthored;
+	
+	// TODO ? muss hier ManyToMany oder OneToMany eingebaut werden?
+	@Column
+	private Person peopleOberserving;
+	
+	@Column
+	private Person peopleOberserved;
 	
 	public Person(final String email, final Document avatar) {
 		this.name = new Name();
 		this.adress = new Adress();
 		this.group = Group.USER;
-		this.messageAuthored = Collections.emptyList();
+		this.messageAuthored = Collections.emptySet();
 		this.peopleOberserving = new Person();
 		this.peopleOberserved = new Person();
 		this.passHash = new byte[0];
@@ -80,18 +74,6 @@ public class Person extends BaseEntity {
 	protected Person()
 	{
 		this(null, null);
-	}
-
-    public Set<Message> getMessageAuthored() {
-        return messageAuthored;
-    }
-
-	public Set<Person> getPeopleOberserving() {
-		return peopleOberserving;
-	}
-
-	public Set<Person> getPeopleOberserved() {
-		return peopleOberserved;
 	}
 	
 	public String getEmail() {
@@ -110,6 +92,7 @@ public class Person extends BaseEntity {
 		this.group = group;
 	}
 
+	
 	static public byte[] passwordHash(String password)
 	{
 		final byte[] passwordBytes = password.getBytes(StandardCharsets.UTF_8);

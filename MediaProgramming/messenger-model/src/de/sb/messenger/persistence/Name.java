@@ -8,15 +8,16 @@ public class Name {
 
 	@Size(min = 1, max = 31)
 	@NotNull
-	@Column(name = "given", nullable=false, insertable=false)
+	@Column
 	private String given;
 	
 	@Size(min = 1, max = 31)
 	@NotNull
-	@Column(name = "family", nullable=false, insertable=false)
+	@Column
 	private String family;
 	
 	public Name() {
+		
 		this.given = "";
 		this.family = "";
 	}

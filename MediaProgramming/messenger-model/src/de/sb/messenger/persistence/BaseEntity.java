@@ -5,36 +5,30 @@ import java.util.Set;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-import javax.xml.bind.annotation.XmlType;
 
 @Entity 
 @Inheritance
-@XmlAccessorType (XmlAccessType.NONE)
-@XmlType
-@XmlSeeAlso(value = { Document.class, Message.class, Person.class })
 public class BaseEntity implements Comparable<BaseEntity> {
 
 	@NotNull
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Id
-	@Column(name = "identity", nullable=false, insertable=false, updatable=false)
+	@GeneratedValue(TODO)
+	@Id 
+	@Column nullbarkeit updatebarkeit insertbarkeit
 	private long identity;
 	
 	@NotNull
-	@Column(name = "version", nullable=false, insertable=false)
+	@Column
 	@Version
 	private int version;
 	
 	@NotNull
-	@Column(name = "creationTimestamp", nullable=false, insertable=false, updatable=false)
+	@Column
 	private long creationTimestamp;
 	
 	@Min(0)
 	@NotNull
-	@Column(name = "messageCaused", nullable=false, updatable=false, insertable=false)
-	@OneToMany(mappedBy = "author")
+	@Column
+	@OneToMany
 	private Set<Message> messageCaused;
 	
 	public BaseEntity() {
