@@ -20,6 +20,7 @@ public class Client implements Callable<NetworkClient>
     // [y][x] & einer = top stone
     int[][] gamePitch = new int[7][];
     int points1 = 0, points2 = 0, points3 = 0;
+    boolean player1 = true, player2 = true, player3 = true;
 
     public Client(String hostName, String teamName, BufferedImage logo) {
         this.hostName = hostName;
@@ -37,20 +38,33 @@ public class Client implements Callable<NetworkClient>
         int latency = networkClient.getExpectedNetworkLatencyInMilliseconds();
         int time = networkClient.getTimeLimitInSeconds();
         playerNumber = networkClient.getMyPlayerNumber() + 1;
+        int player = 0;
 
         for (;;) {
             Move receiveMove;
             while ((receiveMove = networkClient.receiveMove()) != null) {
 
-                int player = GetTop(gamePitch, receiveMove.fromX, receiveMove.fromY);
+                int currentplayer = GetTop(gamePitch, receiveMove.fromX, receiveMove.fromY);
+
                 int points = Move(gamePitch, receiveMove);
 
-                if(player == 1)
+                if(currentplayer == 1) {
                     points1 += points;
-                else if(player == 2)
+                    if(player != 0 && player != 3)
+                        player3 = false;
+                }
+                else if(currentplayer == 2) {
                     points2 += points;
-                else if(player == 3)
+                    if(player != 0 && player != 1)
+                        player1 = false;
+                }
+                else if(currentplayer == 3) {
                     points3 += points;
+                    if(player != 0 && player != 2)
+                        player2 = false;
+                }
+
+                player = currentplayer;
 
                 if (playerNumber == 1) {
                     PrintPitch(gamePitch);
@@ -61,8 +75,8 @@ public class Client implements Callable<NetworkClient>
                 }
             }
 
-            //networkClient.sendMove(GetBestMove(playerNumber, 1));
-            networkClient.sendMove(GetRandomMove(playerNumber));
+            networkClient.sendMove(GetBestMove(playerNumber, 4));
+            //networkClient.sendMove(GetRandomMove(playerNumber));
         }
     }
 
@@ -227,8 +241,20 @@ public class Client implements Callable<NetworkClient>
 
     public int GetNextPlayer(int currentPlayer)
     {
-        int nextPlayer = currentPlayer < 3 ? currentPlayer + 1 : 1;
-        return nextPlayer;
+        do {
+            currentPlayer = currentPlayer < 3 ? currentPlayer + 1 : 1;
+        }while(!DoesPlayerExist(currentPlayer));
+
+        return currentPlayer;
+    }
+
+    public boolean DoesPlayerExist(int player)
+    {
+        if((player == 1 && player1)
+        || (player == 2 && player2)
+        || (player == 3 && player3))
+            return  true;
+        return false;
     }
 
     public Move GetRandomMove(int player)
@@ -278,8 +304,6 @@ public class Client implements Callable<NetworkClient>
 
     public Move GetBestMove(int player, int depth)
     {
-        Move bestMove = null;
-
         int[][]calculatedPitch = new int[gamePitch.length][];
 
         for(int y = 0; y < gamePitch.length; y++) {
@@ -288,7 +312,7 @@ public class Client implements Callable<NetworkClient>
                 calculatedPitch[y][x] = gamePitch[y][x];
         }
 
-        bestMove = GetMoveMinMax(calculatedPitch, player, depth, -1, -1);
+        Move bestMove = GetMoveMinMax(calculatedPitch, player, depth, 0, 0).Move;
 
         return bestMove;
     }
@@ -300,13 +324,7 @@ public class Client implements Callable<NetworkClient>
 
         public int Points;
 
-        public MovePoint(int points)
-        {
-            Move = null;
-            Points = points;
-        }
-
-        public void Set(Move move, int points)
+        public MovePoint(Move move, int points)
         {
             Move = move;
             Points = points;
@@ -315,51 +333,75 @@ public class Client implements Callable<NetworkClient>
 
     //MovePoint currentBestMove = new MovePoint();
 
-    public Move GetMoveMinMax(int[][] pitch, int player, int depth, int alpha, int beta)
+    public MovePoint GetMoveMinMax(int[][] pitch, int player, int depth, int alpha, int beta)
     {
-        MovePoint bestMove = new MovePoint(player == playerNumber ? alpha : beta);
-
-        //System.out.println("player: " + player + " depth: " + depth + " alpha: " + alpha + " beta: " + beta);
+        List<MovePoint> bestMoves = new ArrayList<>();
+        MovePoint bestMove = new MovePoint(null, player == playerNumber ? alpha : beta);
 
         List<Field> tops = GetTops(pitch, player);
         for(Move move : GetValidMoves(pitch, tops))
         {
             int points = Move(pitch, move);
 
-            Move nextMove = null;
+            //System.out.println("Move " + move + " points: " + points);
+
+            MovePoint nextMove = null;
             if(depth - 1 > 0) {
                 nextMove = GetMoveMinMax(pitch, GetNextPlayer(player), depth - 1, alpha, beta);
             }
 
             if (player == playerNumber) {
 
-                points += GetPoints(pitch, nextMove.toX, nextMove.toY, player);
+                if(nextMove != null)
+                    points +=nextMove.Points;
+                //System.out.println("player me, points: " + points + " alpha: " + alpha + " best points: " + bestMove.Points);
 
-                if(points > bestMove.Points)
+                if(points >= bestMove.Points)
                 {
+                    if(points > bestMove.Points)
+                    {
+                        bestMoves.clear();
+                    }
+
+
                     alpha = points;
-                    bestMove.Set(move, alpha);
-                    System.out.println("alpha player: " + player + " depth: " + depth + " alpha: " + alpha + " beta: " + beta);
+                    bestMove = new MovePoint(move, alpha);
+                    bestMoves.add(bestMove);
+                    if(alpha != 0) System.out.println("alpha player: " + player + "move: " + bestMove.Move + " depth: " + depth + " alpha: " + alpha + " beta: " + beta);
                 }
             }
             else {
 
-                points -= GetPoints(pitch, nextMove.toX, nextMove.toY, player);
+                if(nextMove != null)
+                    points -= nextMove.Points;
+                //System.out.println("player enemy, points: " + points);
 
-                if(points < bestMove.Points)
+                if(points <= bestMove.Points)
                 {
+                    if(points < bestMove.Points)
+                    {
+                        bestMoves.clear();
+                    }
+
                     beta = points;
-                    bestMove.Set(move, beta);
-                    System.out.println("beta player: " + player + " depth: " + depth + " alpha: " + alpha + " beta: " + beta);
+                    bestMove = new MovePoint(move, beta);
+                    bestMoves.add(bestMove);
+                    if(beta != 0)System.out.println("beta player: " + player + " depth: " + depth + " alpha: " + alpha + " beta: " + beta);
                 }
             }
+
+//            if(alpha != 0 || beta != 0)
+                //System.out.println(playerNumber + " step player: " + player + " depth: "
+//                                + depth + " alpha: " + alpha + " beta: " + beta + " bestmove: "
+//                                + bestMove.Move + " posints: " + bestMove.Points);
 
             Move(pitch, new Move(move.toX, move.toY, move.fromX, move.fromY));
         }
 
-        //currentBestMove = bestMove;
-
-        return bestMove.Move;
+        Random random = new Random();
+        int rand = random.nextInt(bestMoves.size());
+        if(depth == 4) System.out.println("move size: " + bestMoves.size() +" random: "  + rand + " move: " + bestMoves.get(rand).Move + " points: " + bestMove.Points);
+        return bestMoves.get(rand);
     }
 
 //    private int miniMax(GameTreeNode currentNode, int depth, int alpha, int beta) {
