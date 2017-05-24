@@ -1,22 +1,26 @@
 package de.sb.messenger.persistence;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.validation.constraints.*;
+import javax.xml.bind.annotation.XmlElement;
 
 @Entity
 @Table
 public class Message extends BaseEntity {
 
 	@NotNull
+    @ManyToOne
+    @JoinColumn(name = "authorReference", nullable = false, insertable = false, updatable = false)
 	private final Person author;
 	
 	@NotNull
+    @ManyToOne
+    @JoinColumn(name = "subjectReference", nullable = false, insertable = false, updatable = false)
 	private final BaseEntity subject;
 	
 	@Size(min = 1, max = 4093)
 	@NotNull
-	@Column
+	@Column(name = "body", nullable=false, insertable=false)
+	@XmlElement
 	private String body;
 	
 	protected Message() {
@@ -46,6 +50,7 @@ public class Message extends BaseEntity {
 		this.body = body;
 	}
 	
+	@XmlElement
 	public long getAuthorReference()
 	{
 		return this.author == null ? 0 : this.author.getIdentity();

@@ -9,17 +9,17 @@ public class Adress {
 
 	@Size(min = 0, max = 63)
 	@NotNull
-	@Column
+	@Column(name = "street", nullable=false, insertable=false, updatable=true)
 	private String street;
 	
 	@Size(min = 0, max = 15) 
 	@NotNull
-	@Column
+	@Column(name = "postcode", nullable=false, insertable=false, updatable=true)
 	private String postcode;
 
 	@Size(min = 1, max = 63)
 	@NotNull
-	@Column
+	@Column(name = "city", nullable=false, insertable=false, updatable=true)
 	private String city;
 	
 	protected Adress() {

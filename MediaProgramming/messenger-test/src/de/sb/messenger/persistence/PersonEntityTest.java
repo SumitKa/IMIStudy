@@ -7,6 +7,11 @@ import org.junit.Test;
 
 import de.sb.messenger.persistence.Person.Group;
 
+import javax.persistence.EntityManager;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import java.util.Set;
+
 public class PersonEntityTest extends EntityTest {
 
 	private static EntityManager em = null;
@@ -14,18 +19,18 @@ public class PersonEntityTest extends EntityTest {
 	@Test
 	public void testConstrains()
 	{
-		validator = this.getEntityValidatorFactory().getValidator();
+		Validator validator = this.getValidator().getValidator();
 		
 		Person entity = new Person();
-		 
-		constraintViolations = validator.validate(entity);
+
+        Set<ConstraintViolation<Person>> constraintViolations = validator.validate(entity);
 	}
 	
 	@Test
 	public void testLifeCycle()
 	{
-		em = this.getEntityValidatorFactory().createEntityManager();
-		em.getTransition().begin();
+		em = this.getFactory().createEntityManager();
+		em.getTransaction().begin();
 		
 		Person entity = new Person();
 		
@@ -33,21 +38,13 @@ public class PersonEntityTest extends EntityTest {
 		entity.setGroup(Group.USER);
 		
 		em.persist(entity);
-		em.flush();
-		
-		Person entity2 = new Person();
-		
-		entity2.setEmail("email1");
-		entity2.setGroup(Group.ADMIN);
-		
-		em.persist(entity2);
-		//em.flush();
-		
-		//em.find(Adress.class, )
-		
-		assertNotSame(entity, entity2);
 		
 		em.getTransaction().commit();
+
+		final long id = entity.getIdentity();
+
+		em = this.getFactory().createEntityManager();
+		em.find(Person.class, id);
 		
 		this.getWasteBasket().add(entity.getIdentity());
 		

@@ -1,21 +1,44 @@
 package de.sb.messenger.persistence;
-import java.util.List;
+import org.junit.BeforeClass;
+
+import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.metamodel.Metamodel;
+import javax.validation.*;
+import java.util.*;
+import java.util.List.*;
 
 public class EntityTest {
+	private EntityManagerFactory factory;
+	private ValidatorFactory validator;
 
-	private List<long> wasteBasket = new List<long>();
-	
-	public EntityManagerFactory EntityManagerFactory()
+
+	private List<Long> wasteBasket = new ArrayList<Long>() {
+
+    };
+
+    public EntityManagerFactory getFactory() {
+        return factory;
+    }
+
+    public ValidatorFactory getValidator() {
+        return validator;
+    }
+
+
+    @BeforeClass
+	public void initEntityManagerFactory()
 	{
-		return new EntityManagerFactory();
+        this.factory = Persistence.createEntityManagerFactory("messenger");
+	}
+
+    @BeforeClass
+	public void initEntityValidatorFactory()
+	{
+		this.validator = Validation.buildDefaultValidatorFactory();
 	}
 	
-	public ValidatorFactory getEntityValidatorFactory()
-	{
-		return new ValidatorFactory();
-	}
-	
-	public List<long> getWasteBasket()
+	public List<Long> getWasteBasket()
 	{
 		return wasteBasket;
 	}
