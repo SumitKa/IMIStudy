@@ -2,7 +2,6 @@ import lenz.htw.bogapr.Move;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class Setup {
 
@@ -26,7 +25,7 @@ public class Setup {
 
     // TODO ...
 
-    public void SetUpGamePitch()
+    public void setUpGamePitch()
     {
         for (int y = 0; y <= 6; y++)
         {
@@ -40,17 +39,17 @@ public class Setup {
         // no [0][0] and no [6][0] and no [6][12]
         gamePitch[0][0] = gamePitch[6][0] = gamePitch[6][12] = 999;
 
-        SetUpPlayer();
+        setUpPlayer();
     }
 
-    public void SetUpPlayer()
+    public void setUpPlayer()
     {
         gamePitch[1][0] = gamePitch[1][1] = gamePitch[1][2] = 111;
         gamePitch[5][0] = gamePitch[6][1] = gamePitch[6][2] = 222;
         gamePitch[5][10] = gamePitch[6][10] = gamePitch[6][11] = 333;
     }
 
-    public void PrintPitch(int[][] pitch)
+    public void printPitch(int[][] pitch)
     {
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -65,35 +64,35 @@ public class Setup {
     }
 
 
-    public int Move(int[][] pitch, Move move)
+    public int move(int[][] pitch, Move move)
     {
-        int player = RemoveStone(pitch, move.fromX, move.fromY);
-        int points = AddStone(pitch, move.toX, move.toY, player);
+        int player = removeStone(pitch, move.fromX, move.fromY);
+        int points = addStone(pitch, move.toX, move.toY, player);
 
         return points;
     }
 
-    public int AddStone(int[][] pitch, int x, int y, int player)
+    public int addStone(int[][] pitch, int x, int y, int player)
     {
-        int points = GetPoints(pitch, x, y, player);
+        int points = getPoints(pitch, x, y, player);
         int stones = pitch[y][x] * 10 + player;
         pitch[y][x] = stones;
 
         return points;
     }
 
-    public int GetPoints(int[][] pitch, int x, int y, int player)
+    public int getPoints(int[][] pitch, int x, int y, int player)
     {
         int points = 0;
 
-        int currentTopPlayer = GetTop(pitch, x, y);
+        int currentTopPlayer = getTop(pitch, x, y);
 
         if(currentTopPlayer != 0 && currentTopPlayer != player)
         {
             points++;
         }
 
-        if(IsEndMove(x, y, player))
+        if(isEndMove(x, y, player))
         {
             points += 5;
         }
@@ -101,7 +100,7 @@ public class Setup {
         return points;
     }
 
-    public boolean IsEndMove(int x, int y, int player)
+    public boolean isEndMove(int x, int y, int player)
     {
         boolean isEnd = false;
         if((player == 1 && y == 6 && x % 2 == 0)
@@ -111,7 +110,7 @@ public class Setup {
         return isEnd;
     }
 
-    public boolean ShouldEndGame(int player)
+    public boolean shouldEndGame(int player)
     {
         boolean shouldEnd = false;
         if((player == 1 && points1 > points2 && points3 > points3)
@@ -121,36 +120,36 @@ public class Setup {
         return shouldEnd;
     }
 
-    public int RemoveStone(int[][] pitch, int x, int y)
+    public int removeStone(int[][] pitch, int x, int y)
     {
-        int player = GetTop(pitch, x, y);
+        int player = getTop(pitch, x, y);
         pitch[y][x] = pitch[y][x] / 10;
         return player;
     }
 
     // ggf. beim setzten direkt in einer liste abspeichern
-    public List<Field> GetTops(int[][] pitch, int player)
+    public List<Field> getTops(int[][] pitch, int player)
     {
         List<Field> tops = new ArrayList<>();
 
         for (int y = 0; y < pitch.length; y++)
             for(int x = 0; x < pitch[y].length; x++)
-                if(GetTop(pitch, x, y) == player)
-                    tops.add(new Field(x, y, GetCount(pitch, x, y), player));
+                if(getTop(pitch, x, y) == player)
+                    tops.add(new Field(x, y, getCount(pitch, x, y), player));
 
         //System.out.println(tops.size() + " tops for player " + player);
 
         return tops;
     }
 
-    public int GetTop(int[][] pitch, int x, int y)
+    public int getTop(int[][] pitch, int x, int y)
     {
         int player = pitch[y][x] % 10;
         return player;
     }
 
-    // teuer -> direkt beim setzten merken
-    public int GetCount(int[][] pitch, int x, int y)
+    // teuer -> direkt beim setzen merken
+    public int getCount(int[][] pitch, int x, int y)
     {
         int pitchInt = pitch[y][x];
         int count = 0;
@@ -169,21 +168,21 @@ public class Setup {
         return count;
     }
 
-    public boolean HasNotMax(int[][] pitch, int x, int y)
+    public boolean hasNotMax(int[][] pitch, int x, int y)
     {
         return pitch[y][x] / 100 == 0;
     }
 
-    public int GetNextPlayer(int currentPlayer)
+    public int getNextPlayer(int currentPlayer)
     {
         do {
             currentPlayer = currentPlayer < 3 ? currentPlayer + 1 : 1;
-        }while(!DoesPlayerExist(currentPlayer));
+        }while(!doesPlayerExist(currentPlayer));
 
         return currentPlayer;
     }
 
-    public boolean DoesPlayerExist(int player)
+    public boolean doesPlayerExist(int player)
     {
         if((player == 1 && player1)
                 || (player == 2 && player2)

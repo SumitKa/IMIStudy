@@ -45,7 +45,7 @@ public class Client implements Callable<NetworkClient>
     @Override
     public NetworkClient call() throws Exception {
 
-        setup.SetUpGamePitch();
+        setup.setUpGamePitch();
 
         NetworkClient networkClient = new NetworkClient(hostName, teamName, logo);
 
@@ -58,9 +58,9 @@ public class Client implements Callable<NetworkClient>
             Move receiveMove;
             while ((receiveMove = networkClient.receiveMove()) != null) {
 
-                int currentplayer = setup.GetTop(setup.gamePitch, receiveMove.fromX, receiveMove.fromY);
+                int currentplayer = setup.getTop(setup.gamePitch, receiveMove.fromX, receiveMove.fromY);
 
-                int points = setup.Move(setup.gamePitch, receiveMove);
+                int points = setup.move(setup.gamePitch, receiveMove);
 
                 if(currentplayer == 1) {
                     setup.points1 += points;
@@ -81,11 +81,11 @@ public class Client implements Callable<NetworkClient>
                 player = currentplayer;
 
                 if (playerNumber == 1) {
-                    setup.PrintPitch(setup.gamePitch);
+                    setup.printPitch(setup.gamePitch);
                     System.out.println("player " + player + " got " + points + " points with this move");
                     System.out.println("points: player 1: " + setup.points1 + " player 2: " + setup.points2 + " player 3: " + setup.points3);
                     System.out.println();
-                    System.out.println("Next move player " + setup.GetNextPlayer(player));
+                    System.out.println("Next move player " + setup.getNextPlayer(player));
                 }
             }
 
@@ -106,7 +106,7 @@ public class Client implements Callable<NetworkClient>
 //                calculatedPitch[y][x] = gamePitch[y][x];
 //        }
 
-        List<Setup.Field> tops = setup.GetTops(setup.gamePitch, player);
+        List<Setup.Field> tops = setup.getTops(setup.gamePitch, player);
         List<Move> validMoves = getValidMoves(setup.gamePitch, tops);
 
         System.out.println(validMoves.size() + " valid moves for player " + player);
@@ -161,16 +161,16 @@ public class Client implements Callable<NetworkClient>
         List<MovePoint> bestMoves = new ArrayList<>();
         MovePoint bestMove = new MovePoint(null, player == playerNumber ? alpha : beta);
 
-        List<Setup.Field> tops = setup.GetTops(pitch, player);
+        List<Setup.Field> tops = setup.getTops(pitch, player);
         for(Move move : getValidMoves(pitch, tops))
         {
-            int points = setup.Move(pitch, move);
+            int points = setup.move(pitch, move);
 
             //System.out.println("Move " + move + " points: " + points);
 
             MovePoint nextMove = null;
             if(depth - 1 > 0) {
-                nextMove = getMoveMinMax(pitch, setup.GetNextPlayer(player), depth - 1, alpha, beta);
+                nextMove = getMoveMinMax(pitch, setup.getNextPlayer(player), depth - 1, alpha, beta);
             }
 
             if (player == playerNumber) {
@@ -218,7 +218,7 @@ public class Client implements Callable<NetworkClient>
 //                                + depth + " alpha: " + alpha + " beta: " + beta + " bestmove: "
 //                                + bestMove.Move + " posints: " + bestMove.Points);
 
-            setup.Move(pitch, new Move(move.toX, move.toY, move.fromX, move.fromY));
+            setup.move(pitch, new Move(move.toX, move.toY, move.fromX, move.fromY));
         }
 
         Random random = new Random();
@@ -274,73 +274,73 @@ public class Client implements Callable<NetworkClient>
         List<Move> moves = new ArrayList<>();
 
         if(field.Count == 1) {
-            if (x > 0 && setup.HasNotMax(pitch, x - 1, y))
+            if (x > 0 && setup.hasNotMax(pitch, x - 1, y))
                 moves.add(new Move(x, y, x - 1, y));
-            if (x < pitch[y].length - 1 && setup.HasNotMax(pitch, x + 1, y))
+            if (x < pitch[y].length - 1 && setup.hasNotMax(pitch, x + 1, y))
                 moves.add(new Move(x, y, x + 1, y));
-            if (x % 2 != 0 && y > 1 && setup.HasNotMax(pitch, x - 1, y - 1))
+            if (x % 2 != 0 && y > 1 && setup.hasNotMax(pitch, x - 1, y - 1))
                 moves.add(new Move(x, y, x - 1, y - 1));
-            if (x % 2 == 0 && y < pitch.length - 1 && setup.HasNotMax(pitch, x + 1, y + 1))
+            if (x % 2 == 0 && y < pitch.length - 1 && setup.hasNotMax(pitch, x + 1, y + 1))
                 moves.add(new Move(x, y, x + 1, y + 1));
         }
         else if(field.Count == 2) {
             if (x > 1) {
-                if (setup.HasNotMax(pitch, x - 2, y))
+                if (setup.hasNotMax(pitch, x - 2, y))
                     moves.add(new Move(x, y, x - 2, y));
-                if(setup.HasNotMax(pitch, x - 2, y - 1))
+                if(setup.hasNotMax(pitch, x - 2, y - 1))
                     moves.add(new Move(x, y, x - 2, y - 1));
             }
             if (x < pitch[y].length - 2) {
-                if (setup.HasNotMax(pitch, x + 2, y))
+                if (setup.hasNotMax(pitch, x + 2, y))
                     moves.add(new Move(x, y, x + 2, y));
-                if (setup.HasNotMax(pitch, x, y - 1))
+                if (setup.hasNotMax(pitch, x, y - 1))
                     moves.add(new Move(x, y, x, y - 1));
             }
             if (y < pitch.length - 1) {
-                if (setup.HasNotMax(pitch, x, y + 1))
+                if (setup.hasNotMax(pitch, x, y + 1))
                     moves.add(new Move(x, y, x, y + 1));
-                if (setup.HasNotMax(pitch, x + 2, y + 1))
+                if (setup.hasNotMax(pitch, x + 2, y + 1))
                     moves.add(new Move(x, y, x + 2, y + 1));
             }
         }
         else if(field.Count == 3) {
-            if (x > 2 && setup.HasNotMax(pitch, x - 3, y))
+            if (x > 2 && setup.hasNotMax(pitch, x - 3, y))
                 moves.add(new Move(x, y, x - 3, y));
-            if (x < pitch[y].length - 3 && setup.HasNotMax(pitch, x + 3, y))
+            if (x < pitch[y].length - 3 && setup.hasNotMax(pitch, x + 3, y))
                 moves.add(new Move(x, y, x + 3, y));
 
             if (y > 1) {
-                if (x > 2 && setup.HasNotMax(pitch, x - 3, y - 1))
+                if (x > 2 && setup.hasNotMax(pitch, x - 3, y - 1))
                     moves.add(new Move(x, y, x - 3, y - 1));
-                if (x < pitch[y].length - 3 && setup.HasNotMax(pitch, x + 1, y - 1))
+                if (x < pitch[y].length - 3 && setup.hasNotMax(pitch, x + 1, y - 1))
                     moves.add(new Move(x, y, x + 1, y - 1));
             }
             if (y < pitch.length - 1) {
-                if (x > 0 && setup.HasNotMax(pitch, x - 1, y + 1))
+                if (x > 0 && setup.hasNotMax(pitch, x - 1, y + 1))
                     moves.add(new Move(x, y, x - 1, y + 1));
-                if (x < pitch[y].length - 1 && setup.HasNotMax(pitch, x + 3, y + 1))
+                if (x < pitch[y].length - 1 && setup.hasNotMax(pitch, x + 3, y + 1))
                     moves.add(new Move(x, y, x + 3, y + 1));
             }
 
             if (x % 2 == 0) {
-                if (x > 0 && x < pitch[y].length -1 && setup.HasNotMax(pitch, x - 1, y - 1))
+                if (x > 0 && x < pitch[y].length -1 && setup.hasNotMax(pitch, x - 1, y - 1))
                     moves.add(new Move(x, y, x - 1, y - 1));
                 if (y < pitch.length - 2) {
-                    if (setup.HasNotMax(pitch, x + 1, y + 2))
+                    if (setup.hasNotMax(pitch, x + 1, y + 2))
                         moves.add(new Move(x, y, x + 1, y + 2));
-                    if (setup.HasNotMax(pitch, x + 3, y + 2))
+                    if (setup.hasNotMax(pitch, x + 3, y + 2))
                         moves.add(new Move(x, y, x + 3, y + 2));
                 }
             }
             else {
                 if (y > 2) {
-                    if (x > 2 && setup.HasNotMax(pitch, x - 3, y - 2))
+                    if (x > 2 && setup.hasNotMax(pitch, x - 3, y - 2))
                         moves.add(new Move(x, y, x - 3, y - 2));
-                    if (x < pitch[y].length - 3 && setup.HasNotMax(pitch, x - 1, y - 2))
+                    if (x < pitch[y].length - 3 && setup.hasNotMax(pitch, x - 1, y - 2))
                         moves.add(new Move(x, y, x - 1, y - 2));
                 }
                 if (y < pitch.length - 1) {
-                    if (setup.HasNotMax(pitch, x + 1, y + 1))
+                    if (setup.hasNotMax(pitch, x + 1, y + 1))
                         moves.add(new Move(x, y, x + 1, y + 1));
                 }
             }
