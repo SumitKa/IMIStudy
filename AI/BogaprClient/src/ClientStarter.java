@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+// java -Djava.library.path=lib/native -jar bogapr.jar
 
 public class ClientStarter {
     private static final String HOST_NAME = null;
