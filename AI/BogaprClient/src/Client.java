@@ -15,16 +15,35 @@ public class Client implements Callable<NetworkClient>
 
     private class MovePoint
     {
-        public Move Move;
+        public Move returnMove;
 
-        public int Points;
+        public int returnPoints;
 
-        public MovePoint(Move move, int points)
+        public MovePoint(Move returnMove, int returnPoints)
         {
-            Move = move;
-            Points = points;
+            this.returnMove = returnMove;
+            this.returnPoints = returnPoints;
         }
     }
+
+    /*public class MoveValue {
+
+        public int returnValue;
+        public Move returnMove;
+
+        public MoveValue() {
+            returnValue = 0;
+        }
+
+        public MoveValue(int returnValue) {
+            this.returnValue = returnValue;
+        }
+
+        public MoveValue(Move returnMove, int returnValue) {
+            this.returnValue = returnValue;
+            this.returnMove = returnMove;
+        }
+    }*/
 
     //MovePoint currentBestMove = new MovePoint();
 
@@ -89,8 +108,8 @@ public class Client implements Callable<NetworkClient>
                 }
             }
 
-            //networkClient.sendMove(getBestMove(playerNumber, 4));
-            networkClient.sendMove(getRandomMove(playerNumber));
+            networkClient.sendMove(getBestMove(playerNumber, 3));
+            //networkClient.sendMove(getRandomMove(playerNumber));
         }
 
     }
@@ -150,10 +169,37 @@ public class Client implements Callable<NetworkClient>
                 calculatedPitch[y][x] = setup.gamePitch[y][x];
         }
 
-        Move bestMove = getMoveMinMax(calculatedPitch, player, depth, 0, 0).Move;
+        Move bestMove = getMoveMinMax(calculatedPitch, player, depth, 0, 0).returnMove;
 
         return bestMove;
     }
+
+    //    private int miniMax(GameTreeNode currentNode, int depth, int alpha, int beta) {
+    //        if (depth <= 0 || terminalNode(currentNode.getState())) {
+    //            return getHeuristic(currentNode.getState());
+    //        }
+    //        if (currentNode.getState().getCurrentPlayer().equals(selfColor)) {
+    //            int currentAlpha = -INFINITY;
+    //            for (GameTreeNode child : currentNode.getChildren()) {
+    //                currentAlpha = Math.max(currentAlpha, miniMax(child, depth - 1, alpha, beta));
+    //                alpha = Math.max(alpha, currentAlpha);
+    //                if (alpha >= beta) {
+    //                    return alpha;
+    //                }
+    //            }
+    //            return currentAlpha;
+    //        }
+    //        int currentBeta = INFINITY;
+    //        for (GameTreeNode child : currentNode.getChildren()) {
+    //            currentBeta = Math.min(currentBeta, miniMax(child, depth - 1, alpha, beta));
+    //            beta = Math.min(beta, currentBeta);
+    //            if (beta <= alpha) {
+    //                return beta;
+    //            }
+    //        }
+    //        return currentBeta;
+    //    }
+
 
 
     public MovePoint getMoveMinMax(int[][] pitch, int player, int depth, int alpha, int beta)
@@ -176,12 +222,12 @@ public class Client implements Callable<NetworkClient>
             if (player == playerNumber) {
 
                 if(nextMove != null)
-                    points +=nextMove.Points;
+                    points +=nextMove.returnPoints;
                 //System.out.println("player me, points: " + points + " alpha: " + alpha + " best points: " + bestMove.Points);
 
-                if(points >= bestMove.Points)
+                if(points >= bestMove.returnPoints)
                 {
-                    if(points > bestMove.Points)
+                    if(points > bestMove.returnPoints)
                     {
                         bestMoves.clear();
                     }
@@ -190,18 +236,18 @@ public class Client implements Callable<NetworkClient>
                     alpha = points;
                     bestMove = new MovePoint(move, alpha);
                     bestMoves.add(bestMove);
-                    if(alpha != 0) System.out.println("alpha player: " + player + "move: " + bestMove.Move + " depth: " + depth + " alpha: " + alpha + " beta: " + beta);
+                    if(alpha != 0) System.out.println("alpha player: " + player + "move: " + bestMove.returnMove + " depth: " + depth + " alpha: " + alpha + " beta: " + beta);
                 }
             }
             else {
 
                 if(nextMove != null)
-                    points -= nextMove.Points;
+                    points -= nextMove.returnPoints;
                 //System.out.println("player enemy, points: " + points);
 
-                if(points <= bestMove.Points)
+                if(points <= bestMove.returnPoints)
                 {
-                    if(points < bestMove.Points)
+                    if(points < bestMove.returnPoints)
                     {
                         bestMoves.clear();
                     }
@@ -223,35 +269,9 @@ public class Client implements Callable<NetworkClient>
 
         Random random = new Random();
         int rand = random.nextInt(bestMoves.size());
-        if(depth == 4) System.out.println("move size: " + bestMoves.size() +" random: "  + rand + " move: " + bestMoves.get(rand).Move + " points: " + bestMove.Points);
+        if(depth == 4) System.out.println("move size: " + bestMoves.size() +" random: "  + rand + " move: " + bestMoves.get(rand).returnMove + " points: " + bestMove.returnPoints);
         return bestMoves.get(rand);
     }
-
-//    private int miniMax(GameTreeNode currentNode, int depth, int alpha, int beta) {
-//        if (depth <= 0 || terminalNode(currentNode.getState())) {
-//            return getHeuristic(currentNode.getState());
-//        }
-//        if (currentNode.getState().getCurrentPlayer().equals(selfColor)) {
-//            int currentAlpha = -INFINITY;
-//            for (GameTreeNode child : currentNode.getChildren()) {
-//                currentAlpha = Math.max(currentAlpha, miniMax(child, depth - 1, alpha, beta));
-//                alpha = Math.max(alpha, currentAlpha);
-//                if (alpha >= beta) {
-//                    return alpha;
-//                }
-//            }
-//            return currentAlpha;
-//        }
-//        int currentBeta = INFINITY;
-//        for (GameTreeNode child : currentNode.getChildren()) {
-//            currentBeta = Math.min(currentBeta, miniMax(child, depth - 1, alpha, beta));
-//            beta = Math.min(beta, currentBeta);
-//            if (beta <= alpha) {
-//                return beta;
-//            }
-//        }
-//        return currentBeta;
-//    }
 
 
     public List<Move> getValidMoves(int[][] pitch, List<Setup.Field> tops)

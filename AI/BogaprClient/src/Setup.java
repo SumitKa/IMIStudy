@@ -127,7 +127,7 @@ public class Setup {
         return player;
     }
 
-    // ggf. beim setzten direkt in einer liste abspeichern
+    // ggf. beim setzen direkt in einer liste abspeichern
     public List<Field> getTops(int[][] pitch, int player)
     {
         List<Field> tops = new ArrayList<>();
@@ -137,7 +137,7 @@ public class Setup {
                 if(getTop(pitch, x, y) == player)
                     tops.add(new Field(x, y, getCount(pitch, x, y), player));
 
-        //System.out.println(tops.size() + " tops for player " + player);
+        System.out.println(tops.size() + " tops for player " + player);
 
         return tops;
     }
