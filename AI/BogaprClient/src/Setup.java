@@ -5,13 +5,20 @@ import java.util.List;
 
 public class Setup {
 
+    int playerNumber;
+
     // [y][x] & einer = top stone
     int[][] gamePitch = new int[7][];
-
 
     int points1 = 0, points2 = 0, points3 = 0;
     boolean player1 = true, player2 = true, player3 = true;
 
+    public Setup(int playerNumber)
+    {
+        this.playerNumber = playerNumber;
+    }
+
+    List<Move> bestMoves = new ArrayList<>();
 
     public class Field
     {
@@ -64,24 +71,24 @@ public class Setup {
     }
 
 
-    public int move(int[][] pitch, Move move)
+    public int move(int[][] pitch, Move move, boolean calc)
     {
         int player = removeStone(pitch, move.fromX, move.fromY);
-        int points = addStone(pitch, move.toX, move.toY, player);
+        int points = addStone(pitch, move.toX, move.toY, player, calc);
 
         return points;
     }
 
-    public int addStone(int[][] pitch, int x, int y, int player)
+    public int addStone(int[][] pitch, int x, int y, int player, boolean calc)
     {
-        int points = getPoints(pitch, x, y, player);
+        int points = getPoints(pitch, x, y, player, calc);
         int stones = pitch[y][x] * 10 + player;
         pitch[y][x] = stones;
 
         return points;
     }
 
-    public int getPoints(int[][] pitch, int x, int y, int player)
+    public int getPoints(int[][] pitch, int x, int y, int player, boolean calc)
     {
         int points = 0;
 
@@ -90,11 +97,21 @@ public class Setup {
         if(currentTopPlayer != 0 && currentTopPlayer != player)
         {
             points++;
+
+            if(calc && playerNumber == currentTopPlayer)
+            {
+                points++;
+            }
         }
 
         if(isEndMove(x, y, player))
         {
             points += 5;
+
+            if(calc && !shouldEndGame(player, points))
+            {
+                points -= 100;
+            }
         }
 
         return points;
@@ -110,12 +127,12 @@ public class Setup {
         return isEnd;
     }
 
-    public boolean shouldEndGame(int player)
+    public boolean shouldEndGame(int player, int lastPoints)
     {
         boolean shouldEnd = false;
-        if((player == 1 && points1 > points2 && points3 > points3)
-                ||(player == 2 && points2 > points1 && points3 > points3)
-                ||(player == 3 && points3 > points1 && points2 > points3))
+        if((player == 1 && points1 + lastPoints > points2 && points3 + lastPoints > points3)
+         ||(player == 2 && points2 + lastPoints > points1 && points3 + lastPoints > points3)
+         ||(player == 3 && points3 + lastPoints > points1 && points2 + lastPoints > points3))
             shouldEnd = true;
         return shouldEnd;
     }
@@ -137,7 +154,7 @@ public class Setup {
                 if(getTop(pitch, x, y) == player)
                     tops.add(new Field(x, y, getCount(pitch, x, y), player));
 
-        System.out.println(tops.size() + " tops for player " + player);
+        //System.out.println(tops.size() + " tops for player " + player);
 
         return tops;
     }
@@ -190,7 +207,4 @@ public class Setup {
             return  true;
         return false;
     }
-
-
-
 }
