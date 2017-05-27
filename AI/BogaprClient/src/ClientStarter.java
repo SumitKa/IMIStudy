@@ -14,6 +14,7 @@ public class ClientStarter {
     private static final String[] TEAM_NAME = {"GamerOne", "GamerTwo", "GamerThree"};
     private static final String[] LOGO_PATH = {"resources/logo.png", "resources/logo2.png", "resources/logo3.png"};
 
+    //TODO: Korrektes setzen der namen/Logos (low prio)
     public static void main(String[] args) {
         BufferedImage logo;
         List<Client> clients = new ArrayList<>();

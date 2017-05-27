@@ -30,8 +30,6 @@ public class Setup {
         }
     }
 
-    // TODO ...
-
     public void setUpGamePitch()
     {
         for (int y = 0; y <= 6; y++)
@@ -144,7 +142,7 @@ public class Setup {
         return player;
     }
 
-    // ggf. beim setzen direkt in einer liste abspeichern
+
     public List<Field> getTops(int[][] pitch, int player)
     {
         List<Field> tops = new ArrayList<>();
@@ -165,7 +163,7 @@ public class Setup {
         return player;
     }
 
-    // teuer -> direkt beim setzen merken
+
     public int getCount(int[][] pitch, int x, int y)
     {
         int pitchInt = pitch[y][x];
