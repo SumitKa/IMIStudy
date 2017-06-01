@@ -10,16 +10,16 @@ import java.util.concurrent.Executors;
 // java -Djava.library.path=lib/native -jar bogapr.jar
 
 public class ClientStarter {
-    private static final String HOST_NAME = null;
-    private static final String[] TEAM_NAME = {"GamerOne", "GamerTwo", "GamerThree"};
-    private static final String[] LOGO_PATH = {"resources/logo.png", "resources/logo2.png", "resources/logo3.png"};
+    private static final String HOST_NAME = "141.45.214.64";
+    private static final String[] TEAM_NAME = {"KaHo", "GamerTwo", "GamerThree"};
+    private static final String[] LOGO_PATH = {"resources/logo3.png", "resources/logo3.png", "resources/logo3.png"};
 
     //TODO: Korrektes setzen der namen/Logos (low prio)
     public static void main(String[] args) {
         BufferedImage logo;
         List<Client> clients = new ArrayList<>();
         ExecutorService executor = Executors.newFixedThreadPool(3);
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 1; i++) {
             logo = new BufferedImage(256, 256, BufferedImage.TYPE_4BYTE_ABGR);
             try {
                 logo = ImageIO.read(new File(LOGO_PATH[i]));

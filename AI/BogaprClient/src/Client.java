@@ -59,20 +59,20 @@ public class Client implements Callable<NetworkClient> {
 
                 player = currentplayer;
 
-                if (playerNumber == 1) {
+                //if (playerNumber == 1) {
                     setup.printPitch(setup.gamePitch);
                     System.out.println("player " + player + " got " + points + " points with this move");
                     System.out.println("points: player 1: " + setup.points1 + " player 2: " + setup.points2 + " player 3: " + setup.points3);
                     System.out.println();
                     System.out.println("Next move player " + setup.getNextPlayer(player));
                     System.out.println("Latency: " + latency);
-                }
+                //}
             }
 
-            if (playerNumber == 1)
+            //if (playerNumber == 1)
                 networkClient.sendMove(getBestMove(playerNumber, 5));
-            else
-                networkClient.sendMove(getRandomMove(playerNumber));
+            //else
+            //    networkClient.sendMove(getRandomMove(playerNumber));
         }
 
     }
@@ -101,7 +101,7 @@ public class Client implements Callable<NetworkClient> {
         Random random = new Random();
         int rand = random.nextInt(setup.bestMoves.size());
 
-        System.out.println(setup.playerNumber + " COOSE: " + setup.bestMoves.size() + " !  " + rand + " , " + setup.bestMoves.get(rand));
+        System.out.println(setup.playerNumber + " CHOOSE: " + setup.bestMoves.size() + " !  " + rand + " , " + setup.bestMoves.get(rand));
         return setup.bestMoves.get(rand);
     }
 
