@@ -36,7 +36,7 @@ import de.sb.toolbox.net.RestJpaLifecycleProvider;
  * the given identity.</li>
  * </ul>
  */
-@Path("entities")
+@Path("messages")
 @Copyright(year=2017, holders="")
 public class MessageService {
 
