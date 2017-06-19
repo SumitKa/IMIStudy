@@ -1,5 +1,6 @@
 import lenz.htw.kipifub.net.NetworkClient;
 
+import java.util.Random;
 import java.util.concurrent.Callable;
 
 
@@ -16,9 +17,25 @@ public class Client implements Callable<NetworkClient> {
 
     @Override
     public NetworkClient call() throws Exception {
+
         NetworkClient networkClient = new NetworkClient(hostName, teamName);
-        networkClient.pullNextColorChange();
+        send(networkClient);
         return networkClient;
+    }
+
+    public NetworkClient send(NetworkClient client) {
+        Random rng = new Random();
+        int test;
+        for (int i = 0; i < 3; i++) {
+            test = (rng.nextInt() * 2) - 1;
+            if (test < 1) {
+                client.setMoveDirection(i, -1, -1);
+            }
+            else if (test > -1) {
+                client.setMoveDirection(i, 1, 1);
+            }
+        }
+        return client;
     }
 
 }
