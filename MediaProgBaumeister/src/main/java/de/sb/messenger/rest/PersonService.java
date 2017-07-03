@@ -2,15 +2,10 @@ package de.sb.messenger.rest;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.util.*;
 
-import javax.persistence.Cache;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
-import javax.persistence.TypedQuery;
-import javax.print.Doc;
+import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -27,7 +22,7 @@ import de.sb.messenger.persistence.Person;
 import de.sb.toolbox.Copyright;
 import de.sb.toolbox.net.RestCredentials;
 import de.sb.toolbox.net.RestJpaLifecycleProvider;
-import sun.security.x509.AVA;
+
 
 /**
  * JAX-RS based REST service implementation for polymorphic entity resources. The following path and
@@ -95,7 +90,13 @@ public class PersonService {
             Arrays.sort(peoples, Comparator.comparing(Person::getIdentity));
             return peoples;
 
-        }  finally {
+        } catch (IllegalArgumentException exception) {
+            throw new ClientErrorException(400);
+        } catch (NotAuthorizedException exception) {
+            throw new ClientErrorException(401);
+        } catch (RollbackException exception) {
+            throw new ClientErrorException(409);
+        } finally {
             if (!messengerManager.getTransaction().isActive())
                 messengerManager.getTransaction().begin();
         }
@@ -126,6 +127,10 @@ public class PersonService {
             if (entity == null) throw new ClientErrorException(404);
             return entity;
 
+        } catch (IllegalArgumentException exception) {
+            throw new ClientErrorException(400);
+        } catch (NotAuthorizedException exception) {
+            throw new ClientErrorException(401);
         } finally {
             if (!messengerManager.getTransaction().isActive())
                 messengerManager.getTransaction().begin();
@@ -164,7 +169,7 @@ public class PersonService {
             Person person = messengerManager.find(Person.class, personTemplate.getIdentity());
 
             if (person == null) {
-                // TODO: Neue Person anlegen , new Person ist protected?
+                // TODO: Neue Person anlegen , new Person ist protected? (Public machen waere ja keine Loesung!)
                 identity = personTemplate.getIdentity();
             } else {
                 person.setEmail(personTemplate.getEmail());
@@ -175,6 +180,10 @@ public class PersonService {
             }
 
             return identity;
+        } catch (IllegalArgumentException exception) {
+            throw new ClientErrorException(400);
+        } catch (NotAuthorizedException exception) {
+            throw new ClientErrorException(401);
         } finally {
             if (!messengerManager.getTransaction().isActive())
                 messengerManager.getTransaction().begin();
@@ -263,15 +272,29 @@ public class PersonService {
     @GET
     @Path("{identity}/peopleObserving")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
-    public List<Person> getPeopleObserving (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
-        Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
+    public List<Person> getPeopleObserving (
+            @HeaderParam("Authorization") final String authentication,
+            @PathParam("identity") final long identity) {
 
-        final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-        final Person entity = messengerManager.find(Person.class, identity);
-        if (entity == null) throw new ClientErrorException(NOT_FOUND);
-        
-        return entity.getPeopleObserving();
+        try {
+            Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
+            Person person = messengerManager.find(Person.class, identity);
+
+            if (person == null) {
+                throw new ClientErrorException(404);
+            }
+
+            List<Person> observer = new ArrayList<>();
+
+            observer.addAll(person.getPeopleOberserving());
+
+            return observer;
+
+        } finally {
+            if (!messengerManager.getTransaction().isActive())
+                messengerManager.getTransaction().begin();
+        }
     }
 
     /**
@@ -289,15 +312,29 @@ public class PersonService {
     @GET
     @Path("{identity}/peopleObserved")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
-    public List<Person> getPeopleObserved (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
-        Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
+    public List<Person> getPeopleObserved (
+            @HeaderParam("Authorization") final String authentication,
+            @PathParam("identity") final long identity) {
 
-        // TODO
-        final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-        final Person entity = messengerManager.find(Person.class, identity);
-        if (entity == null) throw new ClientErrorException(NOT_FOUND);
-        
-        return null;
+        try {
+            Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
+
+            Person person = messengerManager.find(Person.class, identity);
+
+            if (person == null) {
+                throw new ClientErrorException(404);
+            }
+
+            List<Person> observed = new ArrayList<>();
+
+            observed.addAll(person.getPeopleOberserved());
+
+            return observed;
+
+        } finally {
+            if (!messengerManager.getTransaction().isActive())
+                messengerManager.getTransaction().begin();
+        }
     }
 
     /**
@@ -314,14 +351,32 @@ public class PersonService {
      *         thread is not open
      */
     @PUT
-    @Path("{identity}/people/peopleObserved")
+    @Path("{identity}/peopleObserved")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
-    public void putPeopleObserved (@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
-        Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
+    public void setPeopleObserved (
+            @HeaderParam("Authorization") final String authentication,
+            @PathParam("identity") final long identity) {
 
-        final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-        final Person entity = messengerManager.find(Person.class, identity);
-        if (entity == null) throw new ClientErrorException(NOT_FOUND);
+        Person person = messengerManager.find(Person.class, identity);
+        try {
+            Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
+            //TODO: Update person. Frage: Wie die von der Form erhaltenen Daten erhalten/uebertragen?
+
+
+        } catch (IllegalArgumentException exception) {
+            throw new ClientErrorException(400);
+        } catch (NotAuthorizedException exception) {
+            throw new ClientErrorException(401);
+        } catch (RollbackException exception) {
+            throw new ClientErrorException(409);
+        } finally {
+            if (!messengerManager.getTransaction().isActive())
+                messengerManager.getTransaction().begin();
+            if (person != null) {
+                Cache cache = messengerManager.getEntityManagerFactory().getCache();
+                cache.evict(person.getClass(), person.getIdentity());
+            }
+        }
     }
 
     /**
@@ -426,6 +481,12 @@ public class PersonService {
 
             // Person Identity? Or Http 200? (Response.ok().build() ? )
             return person.getIdentity();
+        } catch (IllegalArgumentException exception) {
+            throw new ClientErrorException(400);
+        } catch (NotAuthorizedException exception) {
+            throw new ClientErrorException(401);
+        } catch (RollbackException exception) {
+            throw new ClientErrorException(409);
         } finally {
             if (!messengerManager.getTransaction().isActive())
                 messengerManager.getTransaction().begin();
