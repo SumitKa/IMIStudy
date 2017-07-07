@@ -57,47 +57,10 @@ public class MessageService {
     }
 
 
-    /**
-     * Deletes the entity matching the given identity, or does nothing if no such entity exists.
-     *
-     * @param authentication the HTTP Basic "Authorization" header value
-     * @param identity       the identity
-     * @return void (HTTP 204)
-     * @throws ClientErrorException  (HTTP 400) if the given HTTP "Authorization" header is malformed
-     * @throws ClientErrorException  (HTTP 401) if authentication is lacking or invalid
-     * @throws ClientErrorException  (HTTP 403) if authentication is successful, but the requester is
-     *                               not an administrator
-     * @throws ClientErrorException  (HTTP 404) if the given entity cannot be found
-     * @throws ClientErrorException  (HTTP 409) if there is a database constraint violation (like
-     *                               conflicting locks)
-     * @throws PersistenceException  (HTTP 500) if there is a problem with the persistence layer
-     * @throws IllegalStateException (HTTP 500) if the entity manager associated with the current
-     *                               thread is not open
-     */
-    @DELETE
-    @Path("{identity}")
-    public void deleteEntity(@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
-        final Person requester = Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
-
-        final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-        if (requester.getGroup() != ADMIN) throw new ClientErrorException(FORBIDDEN);
-        messengerManager.getEntityManagerFactory().getCache().evict(BaseEntity.class, identity);
-
-        final Message entity = messengerManager.find(Message.class, identity);
-        if (entity == null) throw new ClientErrorException(NOT_FOUND);
-        messengerManager.remove(entity);
-
-        try {
-            messengerManager.getTransaction().commit();
-        } catch (final RollbackException exception) {
-            throw new ClientErrorException(CONFLICT);
-        } finally {
-            messengerManager.getTransaction().begin();
-        }
-    }
+   
 
     /**
-     * Creates a new message with the requesting person as author, using the given form fields “content” and “subjectReference”,
+     * Creates a new message with the requesting person as author, using the given form fields â€œcontentâ€� and â€œsubjectReferenceâ€�,
      * and returning the message's identity.
      * Hint: Make sure that the author and the (polymorphic) subject are evicted from 2nd-level cache once the message is stored,
      * because their mirror relations have to change.
@@ -113,15 +76,21 @@ public class MessageService {
      *                               thread is not open
      */
     @PUT
-    @Path("{identity}/message")
-    @Produces({APPLICATION_JSON, APPLICATION_XML})
-    public long putMessage(@HeaderParam("Authorization") final String authentication, @PathParam("message")final Message entity) {
-        Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
-
+    @Consumes(MediaType.PLAIN_TEXT)
+    @Produces(MediaType.PLAIN_TEXT)
+    public long putMessage(
+    	@HeaderParam("Authorization") final String authentication,
+    	@PathParam("subjectReference")final long subjectReference
+    	final String messageBody) {
+        final Person author = Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
+        final BaseEntity subject = find;
+        final Message message = new Message(author, subject);
+        //TODO persist & comit
+        		
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
         messengerManager.persist(entity);
         
-        return entity.getIdentity();
+        return message.getIdentity();
     }
 
     /**
@@ -138,7 +107,7 @@ public class MessageService {
      *                               thread is not open
      */
     @GET
-    @Path("{identity}/message/{identity}")
+    @Path("{identity}")
     @Produces({APPLICATION_JSON, APPLICATION_XML})
     public Message getMessage(@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
@@ -164,7 +133,7 @@ public class MessageService {
      *                               thread is not open
      */
     @GET
-    @Path("{identity}/message/{identity}/author")
+    @Path("{identity}/author")
     @Produces({APPLICATION_JSON, APPLICATION_XML})
     public Person getMessageAuthor(@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
@@ -190,7 +159,7 @@ public class MessageService {
      *                               thread is not open
      */
     @GET
-    @Path("{identity}/message/{identity}/subject")
+    @Path("{identity}/subject")
     @Produces({APPLICATION_JSON, APPLICATION_XML})
     public BaseEntity getMessageSubject(@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));

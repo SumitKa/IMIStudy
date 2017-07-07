@@ -140,7 +140,7 @@ public class PersonService {
     /**
      * Creates a new person if the given template's identity is zero,
      * or otherwise updates the corresponding person with the given template data.
-     * Optionally, a new password may be set using the header field “Set-Password”. 
+     * Optionally, a new password may be set using the header field â€œSet-Passwordâ€�. 
      * Returns the affected person's identity
      * @param authentication the HTTP Basic "Authorization" header value
      * @param personTemplate the entity
@@ -157,7 +157,7 @@ public class PersonService {
     public long setPerson (
             @Valid @NotNull Person personTemplate,
             @HeaderParam("Authorization") final String authentication,
-    		@HeaderParam("Set-Password") @NotNull String setPassword) {
+    		@HeaderParam("Set-Password") final String password) {
         try {
             Person req = Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
             if ((req.getIdentity() != personTemplate.getIdentity() && !req.getGroup().equals(Person.Group.ADMIN)))
@@ -165,21 +165,40 @@ public class PersonService {
             if (!req.getGroup().equals(Person.Group.ADMIN) && personTemplate.getGroup().equals(Person.Group.ADMIN))
                 throw new ClientErrorException(401);
 
-            long identity;
-            Person person = messengerManager.find(Person.class, personTemplate.getIdentity());
-
-            if (person == null) {
+            final boolean insertMode = personTemplate.getIdentity() == 0;
+ 
+            final Person person;
+            if (insertMode) {
                 // TODO: Neue Person anlegen , new Person ist protected? (Public machen waere ja keine Loesung!)
-                identity = personTemplate.getIdentity();
+            	// protecte/public ist unfug
+            	// prüfen ob admin
+            	//
+                person = new Person(//TODO find default avatar (id=1));
             } else {
-                person.setEmail(personTemplate.getEmail());
-                person.setGroup(personTemplate.getGroup());
-                // TODO Felder setzen, frage: Class Person enthaelt keine getter und setter fuer die Felder?
-                identity = person.getIdentity();
-                messengerManager.getTransaction().commit();
-            }
+                person = messengerManager.find(Person.class, personTemplate.getIdentity());
 
-            return identity;
+                //TODO if person == null dann fehler
+                 
+               
+             }
+
+            person.setEmail(personTemplate.getEmail());
+            person.setGroup(personTemplate.getGroup());
+            person.getName().setFirst(personTemplate.getName().getFirst());
+            if (password != null)
+            {
+            	final byte[]passwordHash=Person.calculateHash(password);
+            	person.setPasswordHash(passwordHash);
+            }
+            
+            if (insertMode) {
+            	messengerManager.persist(person);
+            } else {
+            	messengerManager.flush();
+            }
+            
+            messengerManager.getTransaction().commit();
+            return person.getIdentity();
         } catch (IllegalArgumentException exception) {
             throw new ClientErrorException(400);
         } catch (NotAuthorizedException exception) {
@@ -235,21 +254,14 @@ public class PersonService {
             @HeaderParam("Authorization") final String authentication,
             @PathParam("identity") final long identity) {
         try {
-            final Person requester = Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
+           Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
             Person person = messengerManager.find(Person.class, identity);
 
             if (person == null)
                 throw new ClientErrorException(404);
 
-            Set<Message> matchingMessages = new HashSet<>();
-
-            for (Message message : person.getMessageAuthored()) {
-                if (requester.getIdentity() == identity)
-                    matchingMessages.add(message);
-            }
-
-            Message[] messages = matchingMessages.toArray(new Message[0]);
-            Arrays.sort(messages, Comparator.comparing(Message::getCreationTimestamp));
+            Message[] messages = person.getMessageAuthored().toArray(new Message[0]);
+            Arrays.sort(messages, Comparator.comparing(Message::getCreationTimestamp).thenComparing(Message::getIdentity));
             return  messages;
         } finally {
             if (!messengerManager.getTransaction().isActive())
@@ -288,7 +300,7 @@ public class PersonService {
             List<Person> observer = new ArrayList<>();
 
             observer.addAll(person.getPeopleOberserving());
-
+            //TODO sortieren und array, nicht List siehe public Message[] getMessageAuthored
             return observer;
 
         } finally {
@@ -317,6 +329,7 @@ public class PersonService {
             @PathParam("identity") final long identity) {
 
         try {
+        	//TODO sortieren und array, nicht List siehe public Message[] getMessageAuthored
             Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
             Person person = messengerManager.find(Person.class, identity);
@@ -352,17 +365,16 @@ public class PersonService {
      */
     @PUT
     @Path("{identity}/peopleObserved")
-    @Produces({ APPLICATION_JSON, APPLICATION_XML })
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public void setPeopleObserved (
             @HeaderParam("Authorization") final String authentication,
-            @PathParam("identity") final long identity) {
-
+            @PathParam("identity") final long identity
+            final Set<Long> ids) {
+    	//TODO person suche, 3 mengen der personen die sich nicht verändern, hinzugefügt und entfernt werden 
         Person person = messengerManager.find(Person.class, identity);
         try {
             Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
-            //TODO: Update person. Frage: Wie die von der Form erhaltenen Daten erhalten/uebertragen?
-
-
+ 
         } catch (IllegalArgumentException exception) {
             throw new ClientErrorException(400);
         } catch (NotAuthorizedException exception) {
@@ -423,7 +435,7 @@ public class PersonService {
 
     /**
      *    Updates the person's avatar (owner only), with the document content being passed as the HTTP request body,
-     *    and the media type passed as Header-Field “Content-type”. 
+     *    and the media type passed as Header-Field â€œContent-typeâ€�. 
      *    If the given content is empty, the person's avatar is set to the default document (identity=1).
      *    Otherwise, if a document matching the media hash of the given content already exists,
      *    then this document becomes the person's avatar. Otherwise,
@@ -453,6 +465,7 @@ public class PersonService {
             final Person requester = Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
             person = messengerManager.find(Person.class, identity);
 
+            // TODO hier gemachte veränderung  auf getPerson methode anwenden
             if (person == null)
                 throw new ClientErrorException(404);
 
@@ -469,13 +482,19 @@ public class PersonService {
                 doc = messengerManager.find(Document.class, result.get(0));
                 doc.setContentType(contentType);
                 messengerManager.flush();
-            } else {
+            } else { 
+            	//TODO resultsize > 1 dann assertion
                 doc = new Document(documentContent, contentType);
+                //TODO doc kann null sein
                 messengerManager.persist(doc);
             }
-
-            messengerManager.getTransaction().commit();
-            messengerManager.getTransaction().begin();
+           
+            try{
+            	messengerManager.getTransaction().commit();
+            } finally {
+            	messengerManager.getTransaction().begin();
+            }
+            
             person.setAvatar(doc);
             messengerManager.getTransaction().commit();
 
