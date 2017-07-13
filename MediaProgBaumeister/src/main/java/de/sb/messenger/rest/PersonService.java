@@ -173,7 +173,7 @@ public class PersonService {
             	// protecte/public ist unfug
             	// prüfen ob admin
             	//
-                person = new Person(//TODO find default avatar (id=1));
+                person = new Person(personTemplate.getEmail(),personTemplate.getAvatar());//TODO find default avatar (id=1));
             } else {
                 person = messengerManager.find(Person.class, personTemplate.getIdentity());
 
@@ -184,10 +184,10 @@ public class PersonService {
 
             person.setEmail(personTemplate.getEmail());
             person.setGroup(personTemplate.getGroup());
-            person.getName().setFirst(personTemplate.getName().getFirst());
+            person.setFirst(personTemplate.getName().getFirst());
             if (password != null)
             {
-            	final byte[]passwordHash=Person.calculateHash(password);
+            	final byte[] passwordHash = Person.passwordHash(password);
             	person.setPasswordHash(passwordHash);
             }
             
@@ -284,7 +284,7 @@ public class PersonService {
     @GET
     @Path("{identity}/peopleObserving")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
-    public List<Person> getPeopleObserving (
+    public Person[] getPeopleObserving (
             @HeaderParam("Authorization") final String authentication,
             @PathParam("identity") final long identity) {
 
@@ -293,15 +293,13 @@ public class PersonService {
 
             Person person = messengerManager.find(Person.class, identity);
 
-            if (person == null) {
+            if (person == null) 
                 throw new ClientErrorException(404);
-            }
-
-            List<Person> observer = new ArrayList<>();
-
-            observer.addAll(person.getPeopleOberserving());
-            //TODO sortieren und array, nicht List siehe public Message[] getMessageAuthored
-            return observer;
+            
+            Person[] persons = person.getPeopleOberserving().toArray(new Person[0]);
+            Arrays.sort(persons, Comparator.comparing(Person::getIdentity));
+            return persons;
+            
 
         } finally {
             if (!messengerManager.getTransaction().isActive())
@@ -324,12 +322,11 @@ public class PersonService {
     @GET
     @Path("{identity}/peopleObserved")
     @Produces({ APPLICATION_JSON, APPLICATION_XML })
-    public List<Person> getPeopleObserved (
+    public Person[] getPeopleObserved (
             @HeaderParam("Authorization") final String authentication,
             @PathParam("identity") final long identity) {
 
         try {
-        	//TODO sortieren und array, nicht List siehe public Message[] getMessageAuthored
             Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
             Person person = messengerManager.find(Person.class, identity);
@@ -338,11 +335,9 @@ public class PersonService {
                 throw new ClientErrorException(404);
             }
 
-            List<Person> observed = new ArrayList<>();
-
-            observed.addAll(person.getPeopleOberserved());
-
-            return observed;
+            Person[] persons = person.getPeopleOberserved().toArray(new Person[0]);
+            Arrays.sort(persons, Comparator.comparing(Person::getIdentity));
+            return persons;
 
         } finally {
             if (!messengerManager.getTransaction().isActive())
@@ -368,7 +363,7 @@ public class PersonService {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public void setPeopleObserved (
             @HeaderParam("Authorization") final String authentication,
-            @PathParam("identity") final long identity
+            @PathParam("identity") final long identity,
             final Set<Long> ids) {
     	//TODO person suche, 3 mengen der personen die sich nicht verändern, hinzugefügt und entfernt werden 
         Person person = messengerManager.find(Person.class, identity);
