@@ -1,4 +1,4 @@
-package de.sb.broker.rest;
+package de.sb.messenger.rest;
 
 import static java.util.logging.Level.INFO;
 import java.io.BufferedReader;
