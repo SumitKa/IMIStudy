@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.RollbackException;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 
 import static de.sb.messenger.persistence.Person.Group.ADMIN;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -76,19 +77,25 @@ public class MessageService {
      *                               thread is not open
      */
     @PUT
-    @Consumes(MediaType.PLAIN_TEXT)
-    @Produces(MediaType.PLAIN_TEXT)
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
     public long putMessage(
     	@HeaderParam("Authorization") final String authentication,
-    	@PathParam("subjectReference")final long subjectReference
+    	@QueryParam("subjectReference")final long subjectReference,
     	final String messageBody) {
-        final Person author = Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
-        final BaseEntity subject = find;
-        final Message message = new Message(author, subject);
-        //TODO persist & comit
-        		
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-        messengerManager.persist(entity);
+        final Person author = Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
+        final BaseEntity subject = messengerManager.find(BaseEntity.class, subjectReference);
+        if (subject == null) throw new ClientErrorException(404);
+
+        final Message message = new Message(author, subject, messageBody);
+        messengerManager.persist(message);
+
+        try{
+            messengerManager.getTransaction().commit();
+        } finally {
+            messengerManager.getTransaction().begin();
+        }
         
         return message.getIdentity();
     }

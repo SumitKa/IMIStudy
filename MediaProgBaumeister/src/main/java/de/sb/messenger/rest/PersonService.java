@@ -147,6 +147,7 @@ public class PersonService {
      * @return the messages caused by the matching entity (HTTP 200)
      * @throws ClientErrorException (HTTP 400) if the given HTTP "Authorization" header is malformed
      * @throws ClientErrorException (HTTP 401) if authentication is lacking or invalid
+     * @throws ClientErrorException (HTTP 403) if authentication is valid, but not authorized
      * @throws ClientErrorException (HTTP 404) if the given message cannot be found
      * @throws PersistenceException (HTTP 500) if there is a problem with the persistence layer
      * @throws IllegalStateException (HTTP 500) if the entity manager associated with the current
@@ -161,9 +162,9 @@ public class PersonService {
         try {
             Person req = Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
             if ((req.getIdentity() != personTemplate.getIdentity() && !req.getGroup().equals(Person.Group.ADMIN)))
-                throw new ClientErrorException(401);
-            if (!req.getGroup().equals(Person.Group.ADMIN) && personTemplate.getGroup().equals(Person.Group.ADMIN))
-                throw new ClientErrorException(401);
+                throw new ClientErrorException(403);
+            if (!req.getGroup().equals(
+             //TODO: GIT pull
 
             final boolean insertMode = personTemplate.getIdentity() == 0;
  
@@ -172,14 +173,14 @@ public class PersonService {
                 // TODO: Neue Person anlegen , new Person ist protected? (Public machen waere ja keine Loesung!)
             	// protecte/public ist unfug
             	// prüfen ob admin
-            	//
                 person = new Person(personTemplate.getEmail(),personTemplate.getAvatar());//TODO find default avatar (id=1));
-            } else {
+
+            } else {Person.Group.ADMIN) && personTemplate.getGroup().equals(Person.Group.ADMIN))
+                throw new ClientErrorException(401);
                 person = messengerManager.find(Person.class, personTemplate.getIdentity());
 
-                //TODO if person == null dann fehler
-                 
-               
+                if (person == null)
+                    throw new ClientErrorException(404);
              }
 
             person.setEmail(personTemplate.getEmail());
@@ -196,16 +197,17 @@ public class PersonService {
             } else {
             	messengerManager.flush();
             }
-            
-            messengerManager.getTransaction().commit();
+
+            try{
+                messengerManager.getTransaction().commit();
+            } finally {
+                messengerManager.getTransaction().begin();
+            }
             return person.getIdentity();
         } catch (IllegalArgumentException exception) {
             throw new ClientErrorException(400);
         } catch (NotAuthorizedException exception) {
             throw new ClientErrorException(401);
-        } finally {
-            if (!messengerManager.getTransaction().isActive())
-                messengerManager.getTransaction().begin();
         }
     }
 
@@ -365,8 +367,33 @@ public class PersonService {
             @HeaderParam("Authorization") final String authentication,
             @PathParam("identity") final long identity,
             final Set<Long> ids) {
-    	//TODO person suche, 3 mengen der personen die sich nicht verändern, hinzugefügt und entfernt werden 
+
         Person person = messengerManager.find(Person.class, identity);
+
+        if (person == null)
+            throw new ClientErrorException(404);
+
+        // TODO: getobserved iterieren ID's sammeln alt_ids ; identity == ID's ;
+        // TODO: 3 mengen bilden ids die dazu kommen (differenzmenge) id's minus alt_id's
+        // TODO: id's die entfernt werden --> alt_ids - id's (die in getobs drin sind, aber nicht im set)
+        // TODO: gemeinsame id's beibehalten (optional)
+        // TODO: add, remove, commit, evict (für add, remove und person)
+
+        for(int i = 0; i < person.getPeopleOberserved().size(); i++) {
+            if (!person.getPeopleOberserved().contains(ids)) {
+                person.getPeopleOberserved().remove(ids);
+            }
+            if (!ids.contains(person.getPeopleOberserved())) {
+                person.getPeopleOberserved().add(person);
+            }
+        }
+
+        try{
+            messengerManager.getTransaction().commit();
+        } finally {
+            messengerManager.getTransaction().begin();
+        }
+
         try {
             Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
  
@@ -377,12 +404,8 @@ public class PersonService {
         } catch (RollbackException exception) {
             throw new ClientErrorException(409);
         } finally {
-            if (!messengerManager.getTransaction().isActive())
-                messengerManager.getTransaction().begin();
-            if (person != null) {
-                Cache cache = messengerManager.getEntityManagerFactory().getCache();
-                cache.evict(person.getClass(), person.getIdentity());
-            }
+            Cache cache = messengerManager.getEntityManagerFactory().getCache();
+            cache.evict(person.getClass(), person.getIdentity());
         }
     }
 
@@ -442,6 +465,7 @@ public class PersonService {
      * @return the messages caused by the matching entity (HTTP 200)
      * @throws ClientErrorException (HTTP 400) if the given HTTP "Authorization" header is malformed
      * @throws ClientErrorException (HTTP 401) if authentication is lacking or invalid
+     * @throws ClientErrorException (HTTP 403) if authentication is valid, but not authorized
      * @throws ClientErrorException (HTTP 404) if the given message cannot be found
      * @throws PersistenceException (HTTP 500) if there is a problem with the persistence layer
      * @throws IllegalStateException (HTTP 500) if the entity manager associated with the current
@@ -460,7 +484,6 @@ public class PersonService {
             final Person requester = Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
             person = messengerManager.find(Person.class, identity);
 
-            // TODO hier gemachte veränderung  auf getPerson methode anwenden
             if (person == null)
                 throw new ClientErrorException(404);
 
@@ -473,14 +496,14 @@ public class PersonService {
             List<Long> result = query.getResultList();
             Document doc;
 
+            if(result.size() > 1) throw new AssertionError();
             if (result.size() == 1) {
                 doc = messengerManager.find(Document.class, result.get(0));
+                if (doc == null) throw new ClientErrorException(404);
                 doc.setContentType(contentType);
                 messengerManager.flush();
-            } else { 
-            	//TODO resultsize > 1 dann assertion
+            } else {
                 doc = new Document(documentContent, contentType);
-                //TODO doc kann null sein
                 messengerManager.persist(doc);
             }
            
@@ -491,7 +514,11 @@ public class PersonService {
             }
             
             person.setAvatar(doc);
-            messengerManager.getTransaction().commit();
+            try{
+                messengerManager.getTransaction().commit();
+            } finally {
+                messengerManager.getTransaction().begin();
+            }
 
             // Person Identity? Or Http 200? (Response.ok().build() ? )
             return person.getIdentity();
@@ -502,8 +529,6 @@ public class PersonService {
         } catch (RollbackException exception) {
             throw new ClientErrorException(409);
         } finally {
-            if (!messengerManager.getTransaction().isActive())
-                messengerManager.getTransaction().begin();
             if (person != null) {
                 Cache cache = messengerManager.getEntityManagerFactory().getCache();
                 cache.evict(person.getClass(), person.getIdentity());

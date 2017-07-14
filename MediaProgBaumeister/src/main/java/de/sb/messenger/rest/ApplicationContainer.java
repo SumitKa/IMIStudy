@@ -6,6 +6,9 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import de.sb.toolbox.net.RestJpaLifecycleProvider;
+import de.sb.toolbox.net.RestResponseCodeProvider;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.message.filtering.EntityFilteringFeature;
 import org.glassfish.jersey.moxy.json.MoxyJsonFeature;
@@ -47,7 +50,9 @@ public class ApplicationContainer {
 			.packages(ApplicationContainer.class.getPackage().toString())
 			.register(MoxyJsonFeature.class)	// edit "network.http.accept.default" in Firefox's "about:config"
 			.register(MoxyXmlFeature.class)		// to make "application/json" preferable to "application/xml"
-			.register(EntityFilteringFeature.class);
+			.register(EntityFilteringFeature.class)
+			.register(RestResponseCodeProvider.class)
+			.register(new RestJpaLifecycleProvider("messenger"));
 
 		final HttpServer container = JdkHttpServerFactory.createHttpServer(serviceURI, configuration);
 		final HttpFileHandler resourceHandler = HttpFileHandler.newInstance("/resources");
