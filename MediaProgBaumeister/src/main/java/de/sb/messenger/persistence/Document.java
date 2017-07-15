@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlElement;
 import org.eclipse.persistence.jpa.jpql.Assert;
 
 @PrimaryKeyJoinColumn
-@Embeddable
+
 public class Document extends BaseEntity {
 
     static private final byte[] EMPTY_HASH = mediaHash(new byte[0]);

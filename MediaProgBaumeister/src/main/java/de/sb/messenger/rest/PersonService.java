@@ -163,33 +163,33 @@ public class PersonService {
             Person req = Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
             if ((req.getIdentity() != personTemplate.getIdentity() && !req.getGroup().equals(Person.Group.ADMIN)))
                 throw new ClientErrorException(403);
-            if (!req.getGroup().equals(
-             //TODO: GIT pull
+            if (!req.getGroup().equals(Person.Group.ADMIN) && personTemplate.getGroup().equals(Person.Group.ADMIN))
+                throw new ClientErrorException(403);
 
-            final boolean insertMode = personTemplate.getIdentity() == 0;
- 
-            final Person person;
+            boolean insertMode = personTemplate.getIdentity() == 0;
+
+            Person person = messengerManager.find(Person.class, personTemplate.getIdentity());
+
+            if (person == null)
+                throw new ClientErrorException(404);
+
             if (insertMode) {
                 // TODO: Neue Person anlegen , new Person ist protected? (Public machen waere ja keine Loesung!)
             	// protecte/public ist unfug
             	// prüfen ob admin
                 person = new Person(personTemplate.getEmail(),personTemplate.getAvatar());//TODO find default avatar (id=1));
 
-            } else {Person.Group.ADMIN) && personTemplate.getGroup().equals(Person.Group.ADMIN))
+            } else {
                 throw new ClientErrorException(401);
-                person = messengerManager.find(Person.class, personTemplate.getIdentity());
-
-                if (person == null)
-                    throw new ClientErrorException(404);
              }
 
             person.setEmail(personTemplate.getEmail());
             person.setGroup(personTemplate.getGroup());
-            person.setFirst(personTemplate.getName().getFirst());
+            //person.setFirst(personTemplate.getName().getFirst());
             if (password != null)
             {
             	final byte[] passwordHash = Person.passwordHash(password);
-            	person.setPasswordHash(passwordHash);
+            	//person.setPasswordHash(passwordHash);
             }
             
             if (insertMode) {

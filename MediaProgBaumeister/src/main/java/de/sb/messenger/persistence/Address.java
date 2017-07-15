@@ -5,7 +5,7 @@ import javax.validation.constraints.*;
 @Entity
 @Table
 @Embeddable 
-public class Adress {
+public class Address {
 
 	@Size(min = 0, max = 63)
 	@NotNull
@@ -22,11 +22,11 @@ public class Adress {
 	@Column(name = "city", nullable=false, insertable=false, updatable=true)
 	private String city;
 	
-	protected Adress() {
+	protected Address() {
 		this(null, null, null);
 	}
 	
-	public Adress(String street, String postcode, String city)
+	public Address(String street, String postcode, String city)
 	{
 		this.setStreet(street);
 		this.setPostcode(postcode);

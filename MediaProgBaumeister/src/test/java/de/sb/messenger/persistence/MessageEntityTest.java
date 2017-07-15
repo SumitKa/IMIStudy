@@ -2,7 +2,7 @@ package de.sb.messenger.persistence;
 
 import org.junit.Test;
 
-public class AuctionEntityTest extends EntityTest {
+public class MessageEntityTest extends EntityTest {
 
 	@Test
 	public void testConstrains()

@@ -1,6 +1,5 @@
 package de.sb.messenger.persistence;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,6 +11,10 @@ import javax.xml.bind.annotation.XmlElement;
 
 @Entity
 public class Person extends BaseEntity {
+
+	public Name getName() {
+		return name;
+	}
 
 	public static enum Group {
 		ADMIN,
@@ -41,7 +44,7 @@ public class Person extends BaseEntity {
 	@Valid
 	@Embedded
 	@XmlElement
-	private Adress adress;
+	private Address address;
 	
 	@Valid
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -60,7 +63,7 @@ public class Person extends BaseEntity {
 	@Column(name = "peopleOberserved", nullable=false, insertable=false, updatable=false)
 	@XmlElement
 	@ManyToMany
-	@JoinTable(schema = "peopleObserving", name = "", inverseJoinColumns = "", uniqueConstraints = "")
+	@JoinTable(schema = "peopleObserving", name = "")
 	private Set<Person> peopleOberserved;
 
 	public void setAvatar(Document avatar) {
@@ -74,7 +77,7 @@ public class Person extends BaseEntity {
 
 	public Person(final String email, final Document avatar) {
 		this.name = new Name();
-		this.adress = new Adress();
+		this.address = new Address();
 		this.group = Group.USER;
 		this.messageAuthored = new HashSet<>();
 		this.peopleOberserving = new HashSet<>();
