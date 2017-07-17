@@ -26,6 +26,11 @@ public class GridWindow extends JFrame{
         _drawPane.drawBoard(_drawPane.getGraphics(), board, complete);
     }
 
+    public void drawBots(Bot[][] bots)
+    {
+        _drawPane.drawBots(_drawPane.getGraphics(), bots);
+    }
+
     //create a component that you can actually draw on.
     class DrawPane extends JPanel
     {
@@ -45,6 +50,25 @@ public class GridWindow extends JFrame{
 //                g.drawLine(0, i * _gridSize, g.getClipBounds().width, i*_gridSize);
 //            }
 //        }
+
+        public void drawBot(Graphics g, Bot bot) {
+            // player 0 = red, 1 = green, 2 = blue
+            if (bot.getPlayerNumber() == 0)
+                g.setColor(new Color(100, 0, 0));
+            else if (bot.getPlayerNumber() == 1)
+                g.setColor(new Color(0, 100, 0));
+            else if (bot.getPlayerNumber() == 2)
+                g.setColor(new Color(0, 0, 100));
+
+            g.drawOval(bot.getXPosition(), bot.getYPosition(), bot.getBotNumber() * 10, bot.getBotNumber() * 10);
+        }
+
+        public void drawBots(Graphics g, Bot[][] bots )
+        {
+            for(int player = 0; player < bots.length; player++)
+                for(int bot = 0; bot < bots[player].length; bot++)
+                    drawBot(g, bots[player][bot]);
+        }
 
         public void drawField(Graphics g, int gridSize, int x, int y, Color color, boolean complete) {
 

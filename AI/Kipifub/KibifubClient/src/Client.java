@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.awt.Color;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class Client implements Callable<NetworkClient> {
 
@@ -20,7 +17,9 @@ public class Client implements Callable<NetworkClient> {
 
 	private NetworkClient _client;
 
-	private int[] _botInfluence = new int[3];
+	//private int[] _botInfluence = new int[3];
+    // player, bot
+	private Bot _bots[][];
 
 	// y, x
 	private Color[][] _board;
@@ -51,10 +50,11 @@ public class Client implements Callable<NetworkClient> {
 		NetworkClient client = new NetworkClient(_hostName, _teamName);
 
 		_playerNumber = client.getMyPlayerNumber();
-		_botInfluence[0] = client.getInfluenceRadiusForBot(0);
-		_botInfluence[1] = client.getInfluenceRadiusForBot(1);
-		_botInfluence[2] = client.getInfluenceRadiusForBot(2);
+//		_botInfluence[0] = client.getInfluenceRadiusForBot(0);
+//		_botInfluence[1] = client.getInfluenceRadiusForBot(1);
+//		_botInfluence[2] = client.getInfluenceRadiusForBot(2);
 
+		setupBots(client);
 		setupBoard(client);
 
 		drawGridBoard(true);
@@ -91,6 +91,11 @@ public class Client implements Callable<NetworkClient> {
 		}
 	}
 
+	public void intelligentMovement(NetworkClient _client)
+	{
+
+	}
+
 	public void RandomMovement(NetworkClient client) {
 		Random rng = new Random();
 
@@ -120,6 +125,15 @@ public class Client implements Callable<NetworkClient> {
 		updateAverageBoard();
 	}
 
+	private void setupBots(NetworkClient client)
+	{
+		_bots = new Bot[3][3];
+
+		for(int player = 0; player < _bots.length; player++)
+		    for(int bot = 0; bot < _bots[player].length; bot++)
+		        _bots[player][bot] = new Bot(client, player, bot);
+	}
+
 	private void setupAverageBoard()
 	{
 		_averageBoard = new Color[_board.length / AVERAGE_BOARD_CELL_SIZE][_board[0].length / AVERAGE_BOARD_CELL_SIZE];
@@ -131,8 +145,13 @@ public class Client implements Callable<NetworkClient> {
 		if (colorChange != null) {
 			int x = colorChange.x;
 			int y = colorChange.y;
-			for (int xx = -_botInfluence[colorChange.bot]; xx <= _botInfluence[colorChange.bot]; xx++)
-				for (int yy = -_botInfluence[colorChange.bot]; yy <= _botInfluence[colorChange.bot]; yy++)
+
+			Bot currentBot = _bots[colorChange.player][colorChange.bot];
+			currentBot.setXPosition(x);
+			currentBot.setYPosition(y);
+
+			for (int xx = -currentBot.getInfluence(); xx <= currentBot.getInfluence(); xx++)
+				for (int yy = -currentBot.getInfluence(); yy <= currentBot.getInfluence(); yy++)
 					// TODO circle???
 					if (y + yy > 0 && y + yy < _board.length && x + xx > 0 && x + xx < _board[0].length)
 						_board[y + yy][x + xx] = new Color(client.getBoard(x + xx, y + yy));
@@ -167,7 +186,9 @@ public class Client implements Callable<NetworkClient> {
 	}
 
 	public void drawGridBoard(boolean complete) {
-		if (_gridWindow != null)
-			_gridWindow.drawBoard(_averageBoard, complete);
+		if (_gridWindow != null) {
+            _gridWindow.drawBoard(_averageBoard, complete);
+            _gridWindow.drawBots(_bots);
+        }
 	}
 }
