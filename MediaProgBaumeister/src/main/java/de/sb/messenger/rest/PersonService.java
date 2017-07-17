@@ -379,14 +379,37 @@ public class PersonService {
         // TODO: gemeinsame id's beibehalten (optional)
         // TODO: add, remove, commit, evict (für add, remove und person)
 
-        for(int i = 0; i < person.getPeopleOberserved().size(); i++) {
-            if (!person.getPeopleOberserved().contains(ids)) {
-                person.getPeopleOberserved().remove(ids);
-            }
-            if (!ids.contains(person.getPeopleOberserved())) {
-                person.getPeopleOberserved().add(person);
-            }
+        /*Set<Long>
+        Set<Long>
+        Set<Long>
+        Set<Person>
+
+                for (Person p : person.getPeopleOberserved()) {
+                    curobs1.add(p.getIdentity());
+                }
+
+                for(Long pId : ids) {
+                    if (!curobs1.contains(pId))
+                        toadd2.add(pid);
+                }
+
+                for (Long pId : curobs2) {
+                    if (!ids.contains(pId))
+                        toremove3.add(pid);
+                }
+
+                curobs1.removeall(toremove3);
+        curobs1.addAll(toadd2);
+
+        for (Long pId : curobs1) {
+            final Person obs = em.find(Person.class, pId)
+                    if (obs != null)
+                        newpersonobs4.add(obs)
         }
+
+        person.setPeopleOberserved(newpersonobs4);
+
+        messengerManager.persist(person);*/
 
         try{
             messengerManager.getTransaction().commit();

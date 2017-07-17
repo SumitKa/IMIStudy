@@ -29,8 +29,13 @@ public class Person extends BaseEntity {
 	
 	@Column(name = "passHash", nullable=false, insertable=false, updatable=false)
 	private byte[] passHash;
-	
+
+	public void setPeopleOberserved(Set<Person> peopleOberserved) {
+		this.peopleOberserved = peopleOberserved;
+	}
+
 	@Valid
+
 	@Column(name = "group", nullable=false, insertable=false, updatable=false)
 	@Enumerated
 	@XmlElement
