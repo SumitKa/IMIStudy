@@ -86,8 +86,7 @@ public class ServiceTest {
 			.register(MoxyJsonFeature.class)
 			.register(MoxyXmlFeature.class)
 			.register(RestResponseCodeProvider.class)
-			.register(EntityFilteringFeature.class)
-			.register(new RestJpaLifecycleProvider("messenger"));
+			.register(EntityFilteringFeature.class);
 
 		return ClientBuilder.newClient(configuration).target(SERVICE_URI);
 	}

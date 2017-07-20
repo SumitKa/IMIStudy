@@ -30,6 +30,7 @@ import static javax.ws.rs.core.Response.Status.*;
 @Copyright(year=2017, holders="")
 public class MessageService {
 
+
     /**
      * Returns the entity with the given identity.
      *
@@ -81,9 +82,11 @@ public class MessageService {
     	@HeaderParam("Authorization") final String authentication,
     	@QueryParam("subjectReference")final long subjectReference,
     	final String messageBody) {
+
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
         final Person author = Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
         final BaseEntity subject = messengerManager.find(BaseEntity.class, subjectReference);
+
         if (subject == null) throw new ClientErrorException(404);
 
         final Message message = new Message(author, subject, messageBody);
@@ -142,7 +145,9 @@ public class MessageService {
     @GET
     @Path("{identity}/author")
     @Produces({APPLICATION_JSON, APPLICATION_XML})
-    public Person getMessageAuthor(@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public Person getMessageAuthor(
+            @HeaderParam("Authorization") final String authentication,
+            @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
@@ -168,7 +173,9 @@ public class MessageService {
     @GET
     @Path("{identity}/subject")
     @Produces({APPLICATION_JSON, APPLICATION_XML})
-    public BaseEntity getMessageSubject(@HeaderParam("Authorization") final String authentication, @PathParam("identity") final long identity) {
+    public BaseEntity getMessageSubject(
+            @HeaderParam("Authorization") final String authentication,
+            @PathParam("identity") final long identity) {
         Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");

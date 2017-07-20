@@ -14,8 +14,8 @@
 			<property name="eclipselink.logging.parameters" value="true"/>
 
 			<property name="hibernate.archive.autodetection" value="class"/>
-			<property name="hibernate.cache.use_second_level_cache" value="false" />
- 			<property name="hibernate.show_sql" value="true" />
+			<property name="hibernate.cache.use_second_level_cache" value="false"/>
+ 			<property name="hibernate.show_sql" value="true"/>
 		</properties>
 	</persistence-unit>
 </persistence>
