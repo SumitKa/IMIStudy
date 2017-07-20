@@ -1,0 +1,5 @@
+rootProject.name = 'messenger-manager'
+include 'model'
+include 'test'
+include 'web'
+
