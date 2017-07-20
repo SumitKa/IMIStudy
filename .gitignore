@@ -1,5 +1,11 @@
-
-# User-specific stuff:
-.idea
-Documents
+classpath
+.project
+.settings/
+model/bin/
+test/bin/
+web/bin/
+model/.idea/
+model/out/
+test/.idea/
+test/out/
 *.iml
