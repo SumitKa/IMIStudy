@@ -7,8 +7,10 @@ import de.sb.toolbox.Copyright;
 import de.sb.toolbox.net.RestCredentials;
 import de.sb.toolbox.net.RestJpaLifecycleProvider;
 
+import javax.persistence.Cache;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
+import javax.persistence.RollbackException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
@@ -77,28 +79,46 @@ public class MessageService {
      */
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
+    @Path("{identity}/message")
     @Produces(MediaType.TEXT_PLAIN)
     public long putMessage(
     	@HeaderParam("Authorization") final String authentication,
     	@QueryParam("subjectReference")final long subjectReference,
+        @PathParam("identity") long identity,
     	final String messageBody) {
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
+
         final Person author = Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
         final BaseEntity subject = messengerManager.find(BaseEntity.class, subjectReference);
 
-        if (subject == null) throw new ClientErrorException(404);
+        try {
 
-        final Message message = new Message(author, subject, messageBody);
-        messengerManager.persist(message);
+            if (subject == null) throw new ClientErrorException(404);
 
-        try{
-            messengerManager.getTransaction().commit();
+            final Message message = new Message(author, subject, messageBody);
+            messengerManager.persist(message);
+
+            try{
+                messengerManager.getTransaction().commit();
+            } finally {
+                messengerManager.getTransaction().begin();
+            }
+
+            return message.getIdentity();
+        } catch (IllegalArgumentException exception) {
+            throw new ClientErrorException(400);
+        } catch (NotAuthorizedException exception) {
+            throw new ClientErrorException(401);
+        } catch (RollbackException exception) {
+            throw new ClientErrorException(409);
         } finally {
-            messengerManager.getTransaction().begin();
+            if (messageBody != null) {
+                Cache cache = messengerManager.getEntityManagerFactory().getCache();
+                cache.evict(Message.class, subject.getIdentity());
+                cache.evict(Person.class, author.getIdentity());
+            }
         }
-        
-        return message.getIdentity();
     }
 
     /**
@@ -115,18 +135,26 @@ public class MessageService {
      *                               thread is not open
      */
     @GET
-    @Path("{identity}")
+    @Path("{identity}/message")
     @Produces({APPLICATION_JSON, APPLICATION_XML})
     public Message getMessage(
             @HeaderParam("Authorization") final String authentication,
             @PathParam("identity") final long identity) {
-        Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-        final Message entity = messengerManager.find(Message.class, identity);
-        if (entity == null) throw new ClientErrorException(NOT_FOUND);
-        
-        return entity;
+
+        try {
+            Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
+
+            final Message entity = messengerManager.find(Message.class, identity);
+            if (entity == null) throw new ClientErrorException(404);
+
+            return entity;
+        } catch (IllegalArgumentException exception) {
+            throw new ClientErrorException(400);
+        } catch (NotAuthorizedException exception) {
+            throw new ClientErrorException(401);
+        }
     }
 
     /**
@@ -148,13 +176,21 @@ public class MessageService {
     public Person getMessageAuthor(
             @HeaderParam("Authorization") final String authentication,
             @PathParam("identity") final long identity) {
-        Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-        final Message entity = messengerManager.find(Message.class, identity);
-        if (entity == null) throw new ClientErrorException(NOT_FOUND);
-        
-        return entity.getAuthor();
+
+        try {
+            Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
+
+            final Message entity = messengerManager.find(Message.class, identity);
+            if (entity == null) throw new ClientErrorException(404);
+
+            return entity.getAuthor();
+        } catch (IllegalArgumentException exception) {
+            throw new ClientErrorException(400);
+        } catch (NotAuthorizedException exception) {
+            throw new ClientErrorException(401);
+        }
     }
 
     /**
@@ -176,12 +212,20 @@ public class MessageService {
     public BaseEntity getMessageSubject(
             @HeaderParam("Authorization") final String authentication,
             @PathParam("identity") final long identity) {
-        Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
 
         final EntityManager messengerManager = RestJpaLifecycleProvider.entityManager("messenger");
-        final Message entity = messengerManager.find(Message.class, identity);
-        if (entity == null) throw new ClientErrorException(NOT_FOUND);
-        
-        return entity.getSubject();
+
+        try {
+            Authenticator.authenticate(RestCredentials.newBasicInstance(authentication));
+
+            final Message entity = messengerManager.find(Message.class, identity);
+            if (entity == null) throw new ClientErrorException(404);
+
+            return entity.getSubject();
+        }  catch (IllegalArgumentException exception) {
+                throw new ClientErrorException(400);
+        } catch (NotAuthorizedException exception) {
+                throw new ClientErrorException(401);
+        }
     }
 }
