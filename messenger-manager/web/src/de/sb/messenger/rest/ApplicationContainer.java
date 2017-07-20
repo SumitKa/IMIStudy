@@ -1,4 +1,4 @@
-package de.sb.messenger.rest;
+package sb.messenger.rest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
