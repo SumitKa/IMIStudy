@@ -67,7 +67,11 @@ public class AStar {
     private PriorityQueue<Cell> _open;
     private boolean _closed[][];
 
-    public List<Cell> getWaipoints(Color[][] board, int gridSize, int startX, int startY, int endX, int endY) {
+    private boolean[][] _blockedBoard;
+
+    public List<Cell> getWaipoints(Color[][] board, Bot bot, int gridSize, int startX, int startY, int endX, int endY) {
+
+        setupBlockedBoard(board);
 
         int width = board[0].length;
         int height = board.length;
@@ -77,7 +81,7 @@ public class AStar {
         endX /= gridSize;
         endY /= gridSize;
 
-        if (!setupBoard(board, startX, startY, endX, endY))
+        if (!setupBoard(board, bot, startX, startY, endX, endY))
             return null;
 
         _closed = new boolean[height][width];
@@ -101,13 +105,29 @@ public class AStar {
 
                 List<Cell> path = new ArrayList<>();
 
+                int lastX = current.getX();
+                int lastY = current.getY();
+
                 while (current.getParent() != null) {
-                    //System.out.print(" -> " + current.getParent().getX() + " " + current.getParent().getY());
-                    current.setPositionToGridSize(gridSize);
-                    path.add(current);
+                    //.out.print(" -> " + current.getParent().getX() + " " + current.getParent().getY());
+
+                    int currentX = current.getX();
+                    int currentY = current.getY();
+
+                    if (getDistance(lastX, currentX) != getDistance(currentX, current.getParent().getX())
+                            || getDistance(lastY, currentY) != getDistance(currentY, current.getParent().getY())) {
+                        current.setPositionToGridSize(gridSize);
+                        path.add(current);
+                    }
+
+                    lastX = currentX;
+                    lastY = currentY;
+
                     current = current.getParent();
                 }
 
+                current.setPositionToGridSize(gridSize);
+                path.add(current);
                 //System.out.println();
 
                 return path;
@@ -129,41 +149,41 @@ public class AStar {
 
             if (current.getY() - 1 >= 0) {
                 t = _board[current.getY() - 1][current.getX()];
-                checkAndUpdateCost(current, t, current.getFinalCost() + V_H_COST);
+                checkAndUpdateCost(current, t, current.getFinalCost() + V_H_COST + getColorCost(board[current.getY()][current.getX()], bot));
 
                 if (current.getX() - 1 >= 0) {
                     t = _board[current.getY() - 1][current.getX() - 1];
-                    checkAndUpdateCost(current, t, current.getFinalCost() + DIAGONAL_COST);
+                    checkAndUpdateCost(current, t, current.getFinalCost() + DIAGONAL_COST + getColorCost(board[current.getY()][current.getX()], bot));
                 }
 
                 if (current.getX() + 1 < width) {
                     t = _board[current.getY() - 1][current.getX() + 1];
-                    checkAndUpdateCost(current, t, current.getFinalCost() + DIAGONAL_COST);
+                    checkAndUpdateCost(current, t, current.getFinalCost() + DIAGONAL_COST + getColorCost(board[current.getY()][current.getX()], bot));
                 }
             }
 
             if (current.getX() - 1 >= 0) {
                 t = _board[current.getY()][current.getX() - 1];
-                checkAndUpdateCost(current, t, current.getFinalCost() + V_H_COST);
+                checkAndUpdateCost(current, t, current.getFinalCost() + V_H_COST + getColorCost(board[current.getY()][current.getX()], bot));
             }
 
             if (current.getX() + 1 < width) {
                 t = _board[current.getY()][current.getX() + 1];
-                checkAndUpdateCost(current, t, current.getFinalCost() + V_H_COST);
+                checkAndUpdateCost(current, t, current.getFinalCost() + V_H_COST + getColorCost(board[current.getY()][current.getX()], bot));
             }
 
             if (current.getY() + 1 < height) {
                 t = _board[current.getY() + 1][current.getX()];
-                checkAndUpdateCost(current, t, current.getFinalCost() + V_H_COST);
+                checkAndUpdateCost(current, t, current.getFinalCost() + V_H_COST + getColorCost(board[current.getY()][current.getX()], bot));
 
                 if (current.getX() - 1 >= 0) {
                     t = _board[current.getY() + 1][current.getX() - 1];
-                    checkAndUpdateCost(current, t, current.getFinalCost() + DIAGONAL_COST);
+                    checkAndUpdateCost(current, t, current.getFinalCost() + DIAGONAL_COST + getColorCost(board[current.getY()][current.getX()], bot));
                 }
 
                 if (current.getX() + 1 < width) {
                     t = _board[current.getY() + 1][current.getX() + 1];
-                    checkAndUpdateCost(current, t, current.getFinalCost() + DIAGONAL_COST);
+                    checkAndUpdateCost(current, t, current.getFinalCost() + DIAGONAL_COST + getColorCost(board[current.getY()][current.getX()], bot));
                 }
             }
         }
@@ -173,7 +193,7 @@ public class AStar {
         return null;
     }
 
-    private boolean setupBoard(Color[][] board, int startX, int startY, int endX, int endY) {
+    private boolean setupBoard(Color[][] board, Bot bot, int startX, int startY, int endX, int endY) {
         int width = board[0].length;
         int height = board.length;
 
@@ -181,9 +201,9 @@ public class AStar {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                if (!isBlocked(board, x, y)) {
+                if (!isBlocked(x, y)) {
                     _board[y][x] = new Cell(x, y);
-                    _board[y][x].setHeuristicCost(Math.abs(x - endX) + Math.abs(y - endY));
+                    _board[y][x].setHeuristicCost(Math.abs(x - endX) + Math.abs(y - endY));// + getHeuristicColorCost(board[y][x], bot));
                 } else
                     _board[y][x] = null;
             }
@@ -194,12 +214,53 @@ public class AStar {
             return true;
         } else
             return false;
-
     }
 
-    private boolean isBlocked(Color[][] board, int x, int y) {
-        int blockedValue = 200;
-        return board[y][x].getRed() <= blockedValue && board[y][x].getGreen() <= blockedValue && board[y][x].getBlue() <= blockedValue;
+    private int getColorCost(Color color, Bot bot) {
+        int cost = 255;
+
+        if (bot.getPlayerNumber() == 0)
+            cost += color.getRed() * 2 - color.getBlue() * 1.2f - color.getGreen() * 1.2f;
+        else if (bot.getPlayerNumber() == 1)
+            cost += color.getGreen() * 2 - color.getRed() * 1.2f - color.getBlue() * 1.2f;
+        else if (bot.getPlayerNumber() == 2)
+            cost += color.getBlue() * 2 - color.getRed() * 1.2f - color.getGreen() * 1.2f;
+
+        cost /= 2;
+
+        if (color.getRed() < 50 && color.getGreen() < 50 && color.getBlue() < 50)
+            cost += 1000;
+
+        return cost < 0 ? 0 : cost;
+    }
+
+    public void setupBlockedBoard(Color[][] board) {
+        if (_blockedBoard == null) {
+            int width = board[0].length;
+            int height = board.length;
+
+            _blockedBoard = new boolean[height][width];
+
+            for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++) {
+                    if (!_blockedBoard[y][x]) {
+                        boolean notWhite = board[y][x].getRed() != 255 && board[y][x].getGreen() != 255 && board[y][x].getBlue() != 255;
+                        _blockedBoard[y][x] = notWhite;
+
+                        if (notWhite)
+                            for (int yy = -1; yy <= 1; yy++)
+                                for (int xx = -1; xx <= 1; xx++)
+                                    if (y + yy > 0 && y + yy < _blockedBoard.length && x + xx > 0 && x + xx < _blockedBoard[0].length)
+                                        _blockedBoard[y + yy][x + xx] = true;
+                    }
+                }
+        }
+    }
+
+    private boolean isBlocked(int x, int y) {
+        if (_blockedBoard == null || _blockedBoard.length < y || _blockedBoard[0].length < x)
+            return false;
+        return _blockedBoard[y][x];
     }
 
     private void checkAndUpdateCost(Cell current, Cell t, int cost) {
@@ -212,5 +273,16 @@ public class AStar {
             t.setParent(current);
             if (!inOpen) _open.add(t);
         }
+    }
+
+//    private float getDistance(int startX, int startY, int endX, int endY) {
+//        float xDistance = getDistance(startX, endX);
+//        float yDistance = getDistance(startY, endY);
+//
+//        return (float) Math.sqrt((xDistance * xDistance) + (yDistance * yDistance));
+//    }
+
+    private int getDistance(int start, int end) {
+        return Math.abs(start - end);
     }
 }

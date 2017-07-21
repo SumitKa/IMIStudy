@@ -47,14 +47,13 @@ public class GridWindow extends JFrame {
 
             setBotColor(g, bot);
 
-            System.out.println("fff");
             for (int i = 0; i < bot.getPath().size() - 1; i++) {
                 AStar.Cell startPoint = bot.getPath().get(i);
                 AStar.Cell endPoint = bot.getPath().get(i + 1);
-                g.drawLine(startPoint.getX() + 9, startPoint.getY() + 8, endPoint.getX() + 9, endPoint.getY() + 8);
-                g.drawLine(startPoint.getX() + 8, startPoint.getY() + 8, endPoint.getX() + 8, endPoint.getY() + 8);
-                g.drawLine(startPoint.getX() + 8, startPoint.getY() + 9, endPoint.getX() + 8, endPoint.getY() + 9);
-
+                g.drawLine(startPoint.getX() + 1, startPoint.getY(), endPoint.getX() + 1, endPoint.getY());
+                g.drawLine(startPoint.getX(), startPoint.getY(), endPoint.getX(), endPoint.getY());
+                g.drawLine(startPoint.getX(), startPoint.getY() + 1, endPoint.getX(), endPoint.getY() + 1);
+                g.fillOval(endPoint.getX(), endPoint.getY(), 4, 4);
             }
         }
 
@@ -106,7 +105,7 @@ public class GridWindow extends JFrame {
             }
         }
 
-        private boolean isBlack(Color color) {
+        public boolean isBlack(Color color) {
             return color.getRed() == 0 && color.getGreen() == 0 && color.getBlue() == 0;
         }
 
