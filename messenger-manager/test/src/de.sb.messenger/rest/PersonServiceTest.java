@@ -4,6 +4,7 @@ package de.sb.messenger.rest;
  * Created by kapoor on 12.07.17.
  */
 
+import de.sb.messenger.persistence.Person;
 import org.junit.Test;
 
 import javax.ws.rs.client.WebTarget;
@@ -23,7 +24,9 @@ public class PersonServiceTest extends ServiceTest {
 
         webTarget = newWebTarget("sascha", "sascha").path("people");
         // illegal arguments
-        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), webTarget.queryParam("offset", -1).request().get().getStatus());
+        final Response response = webTarget.queryParam("offset", -1).request().get();
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+        Person entity = response.readEntity(Person.class);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), webTarget.queryParam("limit", -1).request().get().getStatus());
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), webTarget.queryParam("name", "").request().get().getStatus());
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), webTarget.queryParam("name", new String(new char[0])).request().get().getStatus());

@@ -10,11 +10,10 @@ this.de_sb_messenger = this.de_sb_messenger || {};
 
 	/**
 	 * Creates a new messages controller that is derived from an abstract controller.
-	 * @param sessionContext {de_sb_messenger.SessionContext} a session context
 	 * @param entityCache {de_sb_messenger.EntityCache} an entity cache
 	 */
-	de_sb_messenger.MessagesController = function (sessionContext, entityCache) {
-		SUPER.call(this, 1, sessionContext, entityCache);
+	de_sb_messenger.MessagesController = function (entityCache) {
+		SUPER.call(this, 1, entityCache);
 	}
 	de_sb_messenger.MessagesController.prototype = Object.create(SUPER.prototype);
 	de_sb_messenger.MessagesController.prototype.constructor = de_sb_messenger.MessagesController;
@@ -24,10 +23,12 @@ this.de_sb_messenger = this.de_sb_messenger || {};
 	 * method implementation and expanding it.
 	 */
 	de_sb_messenger.MessagesController.prototype.display = function () {
-		if (!this.sessionContext.user) return;
+        var sessionUser = de_sb_messenger.APPLICATION.sessionUser;
+        if (!sessionUser) return;
+
 		SUPER.prototype.display.call(this);
 
-		var subjectIdentities = [this.sessionContext.user.identity].concat(this.sessionContext.user.observedReferences);
+		var subjectIdentities = [sessionUser.identity].concat(sessionUser.observedReferences);
 		var mainElement = document.querySelector("main");
 		var subjectsElement = document.querySelector("#subjects-template").content.cloneNode(true).firstElementChild;
 		var messagesElement = document.querySelector("#messages-template").content.cloneNode(true).firstElementChild;
@@ -43,7 +44,36 @@ this.de_sb_messenger = this.de_sb_messenger || {};
 	 * Displays the root messages.
 	 */
 	de_sb_messenger.MessagesController.prototype.displayRootMessages = function () {
-		// TODO
+        var sessionUser = de_sb_messenger.APPLICATION.sessionUser;
+        if (!sessionUser) return;
+
+        SUPER.prototype.display.call(this);
+        this.displayStatus(200, "OK");
+
+        var sectionElement = document.querySelector("#preferences-template").content.cloneNode(true).firstElementChild;
+        sectionElement.querySelector("button").addEventListener("click", this.persistUser.bind(this));
+        document.querySelector("main").appendChild(sectionElement);
+
+        var self = this;
+        var imageElement = sectionElement.querySelector("img");
+        imageElement.dropFile = null;
+        imageElement.addEventListener("dragover", function (event) {
+            (event = event || window.event).preventDefault();
+            event.dataTransfer.dropEffect = "copy";
+        });
+        imageElement.addEventListener("drop", function (event) {
+            (event = event || window.event).preventDefault();
+            if (event.dataTransfer.files.length === 0) return;
+            this.dropFile = event.dataTransfer.files[0];
+            this.src = URL.createObjectURL(this.dropFile);
+            self.persistAvatar();
+        });
+        imageElement.addEventListener("load", function (event) {
+            (event = event || window.event).preventDefault();
+            URL.revokeObjectURL(this.src);
+        });
+
+        this.displayUser();
 	}
 
 

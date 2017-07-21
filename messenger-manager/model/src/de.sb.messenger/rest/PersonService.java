@@ -400,6 +400,14 @@ public class PersonService {
         } finally {
             Cache cache = messengerManager.getEntityManagerFactory().getCache();
             cache.evict(person.getClass(), person.getIdentity());
+
+            for (final long id : add) {
+                cache.evict(person.getClass(), id);
+            }
+
+            for (final long id : remove) {
+                cache.evict(person.getClass(), id);
+            }
         }
     }
 

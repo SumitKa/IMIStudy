@@ -30,11 +30,11 @@ this.de_sb_messenger = this.de_sb_messenger || {};
 
 		var mainElement = document.querySelector("main");
 		var sectionElement = document.querySelector("#people-observing-template").content.cloneNode(true).firstElementChild;
-		this.refreshAvatarSlider(sectionElement.querySelector("div.image-slider"), this.sessionContext.user.observingReferences, this.toggleObservation);
+		this.refreshAvatarSlider(sectionElement.querySelector("div.image-slider"), de_sb_messenger.APPLICATION.sessionUser.observingReferences, this.toggleObservation);
 		mainElement.appendChild(sectionElement);
 
 		sectionElement = document.querySelector("#people-observed-template").content.cloneNode(true).firstElementChild;
-		this.refreshAvatarSlider(sectionElement.querySelector("div.image-slider"), this.sessionContext.user.observedReferences, this.toggleObservation);
+		this.refreshAvatarSlider(sectionElement.querySelector("div.image-slider"), de_sb_messenger.APPLICATION.sessionUser.observedReferences, this.toggleObservation);
 		mainElement.appendChild(sectionElement);
 
 		sectionElement = document.querySelector("#candidates-template").content.cloneNode(true).firstElementChild;
