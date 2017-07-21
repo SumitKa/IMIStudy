@@ -67,8 +67,7 @@ this.de_sb_util = this.de_sb_util || {};
 		de_sb_util.AJAX.invoke(requestURI, "GET", {"Accept": "application/json"}, null, null, function (request) {
 			var entity = null;
 			if (request.status === 200) {
-				var responseBody = JSON.parse(request.responseText);
-				entity = responseBody[Object.keys(responseBody)[0]];
+				entity = JSON.parse(request.responseText);
 				self.content[key] = entity;
 			}
 			if (callback) callback.call(null, entity);
