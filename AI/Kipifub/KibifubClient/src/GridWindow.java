@@ -47,13 +47,20 @@ public class GridWindow extends JFrame {
 
             setBotColor(g, bot);
 
+            AStar.Cell nextPoint = bot.getNextWaypoint();
+            if(nextPoint != null) {
+                g.drawLine(bot.getXPosition() + 1, bot.getYPosition(), nextPoint.getX() + 1, nextPoint.getY());
+                g.drawLine(bot.getXPosition(), bot.getYPosition(), nextPoint.getX(), nextPoint.getY());
+                g.drawLine(bot.getXPosition(), bot.getYPosition() + 1, nextPoint.getX(), nextPoint.getY() + 1);
+            }
+
             for (int i = 0; i < bot.getPath().size() - 1; i++) {
                 AStar.Cell startPoint = bot.getPath().get(i);
                 AStar.Cell endPoint = bot.getPath().get(i + 1);
                 g.drawLine(startPoint.getX() + 1, startPoint.getY(), endPoint.getX() + 1, endPoint.getY());
                 g.drawLine(startPoint.getX(), startPoint.getY(), endPoint.getX(), endPoint.getY());
                 g.drawLine(startPoint.getX(), startPoint.getY() + 1, endPoint.getX(), endPoint.getY() + 1);
-                g.fillOval(endPoint.getX(), endPoint.getY(), 4, 4);
+                g.fillOval(endPoint.getX(), endPoint.getY(), 5, 5);
             }
         }
 

@@ -13,7 +13,7 @@ public class Client implements Callable<NetworkClient> {
     public static final int BOARD_SIZE = 1024;
     public static final int AVERAGE_BOARD_GRID_SIZE = 16;
     public static final int UPDATE_TIME = 30;
-    public static final int MAX_PATH_TIME = 7000;
+    public static final int MAX_PATH_TIME = 5000;
     public static final int DRAW_TIME = 300;
 
     private boolean DRAW = true;
@@ -45,7 +45,7 @@ public class Client implements Callable<NetworkClient> {
                 _gridWindow = new GridWindow();
         } else {
             DRAW = false;
-            RANDOM_MOVEMENT = true;
+            //RANDOM_MOVEMENT = true;
         }
 
         _aStar = new AStar();
@@ -110,26 +110,35 @@ public class Client implements Callable<NetworkClient> {
 
             if (bot != null) {
 
-                Random rng = new Random();
+                Random random = new Random();
+                boolean newPath = false;
 
-                if (!bot.hasPath() || bot.getDistanceToPathEnd() <= AVERAGE_BOARD_GRID_SIZE * 4 || bot.getLastPathTime() + MAX_PATH_TIME < System.currentTimeMillis())//bot.getCurrentPathDistance() / 3)
+                if (bot.getDistanceToPathEnd() <= 2 || bot.getLastPathTime() + MAX_PATH_TIME < System.currentTimeMillis())// )//bot.getCurrentPathDistance() / 3)
                 {
                     int gridSize = AVERAGE_BOARD_GRID_SIZE;
-                    //if(bot.getBotNumber() == 0) gridSize /= 2;
 
                     Color[][] averageBoard = getAverageBoard(_board, gridSize);
                     Vec2d goalPosition = getGoalPosition(averageBoard, bot);
+                    int goalPositionX = (int) goalPosition.x * gridSize;
+                    int goalPositionY = (int) goalPosition.y * gridSize;
 
                     List<AStar.Cell> wayPoints = _aStar.getWaipoints(averageBoard, bot, gridSize,
-                            bot.getXPosition(), bot.getYPosition(), (int) goalPosition.x * gridSize, (int) goalPosition.y * gridSize);
+                            bot.getXPosition(), bot.getYPosition(), goalPositionX, goalPositionY);
 
+                    bot.setGoalPositionX(goalPositionY);
+                    bot.setGoalPositionY(goalPositionY);
                     bot.setPath(wayPoints);
+//
+//                    if (_playerNumber == 0)
+//                        System.out.println("x new new path " + bot.getBotNumber()+" "  + System.currentTimeMillis() +" " + bot.getGoalPositionX() + " " + bot.getGoalPositionY());
+
+                    newPath = true;
 
                     if (wayPoints == null) {
                         int xDirection = 1, yDirection = 1;
-                        if (rng.nextBoolean())
+                        if (random.nextBoolean())
                             xDirection *= -1;
-                        if (rng.nextBoolean())
+                        if (random.nextBoolean())
                             yDirection *= -1;
 
                         bot.setCurrentXDirection(xDirection);
@@ -146,6 +155,19 @@ public class Client implements Callable<NetworkClient> {
                 }
 
                 if (bot.reachedNextWaypointAndUpdateWaypoints()) {
+
+                    if (!newPath && bot.getLastPathTime() + 1000 < System.currentTimeMillis()) {
+                        int gridSize = AVERAGE_BOARD_GRID_SIZE;
+                        Color[][] averageBoard = getAverageBoard(_board, gridSize);
+
+                        List<AStar.Cell> wayPoints = _aStar.getWaipoints(averageBoard, bot, gridSize,
+                                bot.getXPosition(), bot.getYPosition(), bot.getGoalPositionX(), bot.getGoalPositionY());
+
+//                        if (_playerNumber == 0)
+//                            System.out.println("new path " + bot.getBotNumber()+" "   + System.currentTimeMillis()  +" " + bot.getGoalPositionX() + " " + bot.getGoalPositionY());
+                        bot.setPath(wayPoints);
+                    }
+
                     if (bot.getNextWaypoint() != null) {
                         int xDirection = bot.getNextWaypoint().getX() - bot.getXPosition();// ? -1 : 1;
                         int yDirection = bot.getNextWaypoint().getY() - bot.getYPosition();// ? -1 : 1;
@@ -169,56 +191,18 @@ public class Client implements Callable<NetworkClient> {
             Color color = board[randomY][randomX];
             int value = 200;
             if (_playerNumber == 0) {
-                if (color.getRed() < value && (color.getBlue() > value || color.getGreen() > value))
+                if (color.getRed() < value / 4 && (color.getBlue() > value || color.getGreen() > value))
                     return new Vec2d(randomX, randomY);
             } else if (_playerNumber == 1) {
-                if (color.getGreen() < value && (color.getBlue() > value || color.getRed() > value))
+                if (color.getGreen() < value / 4 && (color.getBlue() > value || color.getRed() > value))
                     return new Vec2d(randomX, randomY);
-            } else if (color.getBlue() < value && (color.getRed() > value || color.getGreen() > value))
+            } else if (color.getBlue() < value / 4 && (color.getRed() > value || color.getGreen() > value))
                 return new Vec2d(randomX, randomY);
 
         }
 
-        while (true) {
-            int randomX = random.nextInt(board[0].length);
-            int randomY = random.nextInt(board.length);
-            Color color = board[randomY][randomX];
-
-            if (color.getRed() > 100 || color.getGreen() > 100 || color.getBlue() > 100)
-                return new Vec2d(randomX, randomY);
-        }
+        return new Vec2d(0, 0);
     }
-//        for (int y = 0; y < board.length; y++)
-//            for (int x = 0; x < board[y].length; x++) {
-//                if (_playerNumber == 0) {
-//                    currentColorValue = board[y][x].getBlue() + board[y][x].getGreen() - board[y][x].getRed() * (bot.getBotNumber() + 1);
-//                    if (currentColorValue >= colorValue) {
-//                        colorValue = currentColorValue;
-//                        xGoal = x;
-//                        yGoal = y;
-//
-//                        System.out.println(colorValue);
-//                    }
-//                }
-//                if (_playerNumber == 0) {
-//                    currentColorValue = board[y][x].getBlue() + board[y][x].getRed() - board[y][x].getGreen() * (bot.getBotNumber() + 1);
-//                    if (currentColorValue > colorValue) {
-//                        colorValue = currentColorValue;
-//                        xGoal = x;
-//                        yGoal = y;
-//                    }
-//                } else {
-//                    currentColorValue = board[y][x].getRed() + board[y][x].getGreen() - board[y][x].getBlue() * (bot.getBotNumber() + 1);
-//                    if (currentColorValue > colorValue) {
-//                        colorValue = currentColorValue;
-//                        xGoal = x;
-//                        yGoal = y;
-//                    }
-//                }
-//            }
-
-//        return new Vec2d(xGoal, yGoal);
-
 
     public void randomMovement(NetworkClient client) {
         Random random = new Random();

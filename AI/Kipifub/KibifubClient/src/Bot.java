@@ -14,6 +14,7 @@ public class Bot {
     private int _xPosition, _yPosition;
     private int _influence;
     private int _currentXDirection, _currentYDirection;
+    private int _goalPositionX, _goalPositionY;
 
     private float _pathDistance;
     public long _lastPathTime;
@@ -56,6 +57,11 @@ public class Bot {
         _currentYDirection = direction;
     }
 
+    public void setGoalPositionX(int position) { _goalPositionX = position; }
+    public void setGoalPositionY(int position) { _goalPositionY = position; }
+    public int getGoalPositionX() { return _goalPositionX; }
+    public int getGoalPositionY() { return _goalPositionY; }
+
     public int getXDirection() {
         return _currentXDirection;
     }
@@ -96,7 +102,7 @@ public class Bot {
     }
 
     public AStar.Cell getNextWaypoint() {
-        if (_path != null && _path.size() > 1)
+        if (_path != null && _path.size() > 0)
             return _path.get(_path.size() - 1);
 
         return null;
@@ -124,7 +130,7 @@ public class Bot {
 
     public float getDistanceToPathEnd() {
         if (_path == null || _path.size() == 0)
-            return 10000;
+            return 0;
 
         float xDistance = Math.abs(_xPosition - _path.get(0).getX());
         float yDistance = Math.abs(_yPosition - _path.get(0).getY());

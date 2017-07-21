@@ -73,6 +73,8 @@ public class AStar {
 
         setupBlockedBoard(board);
 
+
+
         int width = board[0].length;
         int height = board.length;
 
@@ -81,7 +83,7 @@ public class AStar {
         endX /= gridSize;
         endY /= gridSize;
 
-        if (!setupBoard(board, bot, startX, startY, endX, endY))
+        if (_blockedBoard[endY][endX] || !setupBoard(board, bot, startX, startY, endX, endY))
             return null;
 
         _closed = new boolean[height][width];
@@ -108,8 +110,11 @@ public class AStar {
                 int lastX = current.getX();
                 int lastY = current.getY();
 
+//                int finalCost = current.getFinalCost();
+//                int grids = 1;
+
                 while (current.getParent() != null) {
-                    //.out.print(" -> " + current.getParent().getX() + " " + current.getParent().getY());
+                    //System.out.print(" -> " + current.getParent().getX() + " " + current.getParent().getY() + " [" + current._finalCost + "] ");
 
                     int currentX = current.getX();
                     int currentY = current.getY();
@@ -124,11 +129,18 @@ public class AStar {
                     lastY = currentY;
 
                     current = current.getParent();
+
+//                    grids++;
                 }
 
                 current.setPositionToGridSize(gridSize);
                 path.add(current);
                 //System.out.println();
+
+//                System.out.println(finalCost / grids);
+//
+//                if(finalCost / grids > 200)
+//                    return null;
 
                 return path;
             }
@@ -218,13 +230,14 @@ public class AStar {
 
     private int getColorCost(Color color, Bot bot) {
         int cost = 255;
+        float enemyInfluence = 0.7f;
 
         if (bot.getPlayerNumber() == 0)
-            cost += color.getRed() * 2 - color.getBlue() * 1.2f - color.getGreen() * 1.2f;
+            cost += color.getRed() * 2 - (color.getBlue() * enemyInfluence) - (color.getGreen() * enemyInfluence);
         else if (bot.getPlayerNumber() == 1)
-            cost += color.getGreen() * 2 - color.getRed() * 1.2f - color.getBlue() * 1.2f;
+            cost += color.getGreen() * 2 - (color.getRed() * enemyInfluence) - (color.getBlue() * enemyInfluence);
         else if (bot.getPlayerNumber() == 2)
-            cost += color.getBlue() * 2 - color.getRed() * 1.2f - color.getGreen() * 1.2f;
+            cost += color.getBlue() * 2 - (color.getRed() * enemyInfluence) - (color.getGreen() * enemyInfluence);
 
         cost /= 2;
 
