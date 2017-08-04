@@ -52,7 +52,6 @@ this.de_sb_messenger = this.de_sb_messenger || {};
         var section = document.querySelector("section.candidates");
         var inputElements = document.querySelectorAll("section.candidates input");
         var imageSlider = section.querySelector("div.image-slider");
-        var self = this;
         var url = "/services/people";
         var header = {"Accept": "application/json"};
 
@@ -82,7 +81,7 @@ this.de_sb_messenger = this.de_sb_messenger || {};
                     ids.push(person.identity);
                 });
 
-                self.refreshAvatarSlider(imageSlider, ids, self.toggleObservation);
+                this.refreshAvatarSlider(imageSlider, ids, this.toggleObservation);
             }
         });
 
@@ -97,10 +96,10 @@ this.de_sb_messenger = this.de_sb_messenger || {};
     de_sb_messenger.PeopleController.prototype.toggleObservation = function (personIdentity) {
         var sessionUser = de_sb_messenger.APPLICATION.sessionUser;
         if (!sessionUser) return;
-        var self = this;
+
         var observed = [];
 
-        if (self.contains(sessionUser.observedReferences, personIdentity)) {
+        if (this.contains(sessionUser.observedReferences, personIdentity)) {
             sessionUser.observedReferences.forEach(function (item) {
                 if (item !== personIdentity) {
                     observed.push(item);
@@ -112,17 +111,17 @@ this.de_sb_messenger = this.de_sb_messenger || {};
         }
 
         var mainElement = document.querySelector("main");
-        var sectionElement = document.querySelector("#people-observed-template").content.cloneNode(true).firstElementChild;
-        self.refreshAvatarSlider(sectionElement.querySelector("div.image-slider"), sessionUser.observedReferences, self.toggleObservation);
+        var newChild = document.querySelector("#people-observed-template").content.cloneNode(true).firstElementChild;
+        this.refreshAvatarSlider(newChild.querySelector("div.image-slider"), sessionUser.observedReferences, this.toggleObservation);
 
-        var oldElement = mainElement.firstElementChild.nextElementSibling;
-        mainElement.replaceChild(sectionElement, oldElement);
+        var refChild = mainElement.firstElementChild.nextElementSibling;
+        mainElement.replaceChild(newChild, refChild);
 
-        var references = JSON.stringify(sessionUser.observedReferences);
+        var obsRef = JSON.stringify(sessionUser.observedReferences);
         var header = {"Content-Type": "application/json"};
         var url = "/services/people/" + sessionUser.identity + "/peopleObserved";
 
-        de_sb_util.AJAX.invoke(url, "PUT", header, references, null, function (request) {
+        de_sb_util.AJAX.invoke(url, "PUT", header, obsRef, null, function (request) {
             SUPER.prototype.displayStatus(request.status, request.statusText);
         });
 
