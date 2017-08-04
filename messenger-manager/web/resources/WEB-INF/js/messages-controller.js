@@ -84,6 +84,10 @@ this.de_sb_messenger = this.de_sb_messenger || {};
 	 * @param subjectIdentity {String} the subject identity
 	 */
 	de_sb_messenger.MessagesController.prototype.displayMessageEditor = function (parentElement, subjectIdentity) {
-		// TODO
+        var sessionUser = de_sb_messenger.APPLICATION.sessionUser;
+        if (!sessionUser) return;
+
+        // TODO: Editor entfernen und anschließend mit der neuen subjectIdentity ein neuen Editor oeffnen
+		// TODO: Frage: Wie genau ? Leider kein Input.
 	}
 } ());

@@ -48,7 +48,44 @@ this.de_sb_messenger = this.de_sb_messenger || {};
 	 * view's bottom avatar slider with the result.
 	 */
 	de_sb_messenger.PeopleController.prototype.query = function () {
-		// TODO
+
+        var section = document.querySelector("section.candidates");
+        var inputElements = document.querySelectorAll("section.candidates input");
+        var imageSlider = section.querySelector("div.image-slider");
+        var self = this;
+        var url = "/services/people";
+        var header = {"Accept": "application/json"};
+
+        if (inputElements[0].value) {
+            url = url + "?email=" + inputElements[0].value.trim();
+        }
+        if (inputElements[1].value) {
+            url = url + "?givenName=" + inputElements[1].value.trim();
+        }
+        if (inputElements[2].value) {
+            url = url + "?familyName=" + inputElements[2].value.trim();
+        }
+        if (inputElements[3].value) {
+            url = url + "?street=" + inputElements[3].value.trim();
+        }
+        if (inputElements[4].value) {
+            url = url + "?city=" + inputElements[4].value.trim();
+        }
+
+        de_sb_util.AJAX.invoke(url, "GET", header, null, null, function (request) {
+            SUPER.prototype.displayStatus(request.status, request.statusText);
+            if (request.status === 200) {
+                var ids = [];
+                var people = JSON.parse(request.responseText);
+
+                people.forEach(function (person) {
+                    ids.push(person.identity);
+                });
+
+                self.refreshAvatarSlider(imageSlider, ids, self.toggleObservation);
+            }
+        });
+
 	}
 
 
@@ -57,7 +94,53 @@ this.de_sb_messenger = this.de_sb_messenger || {};
 	 * person if it is already observed by the user, or adds it if not.
 	 * @param {String} personIdentity the identity of the person to add or remove
 	 */
-	de_sb_messenger.PeopleController.prototype.toggleObservation = function (personIdentity) {
-		// TODO
-	}
+    de_sb_messenger.PeopleController.prototype.toggleObservation = function (personIdentity) {
+        var sessionUser = de_sb_messenger.APPLICATION.sessionUser;
+        if (!sessionUser) return;
+        var self = this;
+        var observed = [];
+
+        if (self.contains(sessionUser.observedReferences, personIdentity)) {
+            sessionUser.observedReferences.forEach(function (item) {
+                if (item !== personIdentity) {
+                    observed.push(item);
+                }
+            });
+            sessionUser.observedReferences = observed;
+        } else {
+            sessionUser.observedReferences.push(personIdentity);
+        }
+
+        var mainElement = document.querySelector("main");
+        var sectionElement = document.querySelector("#people-observed-template").content.cloneNode(true).firstElementChild;
+        self.refreshAvatarSlider(sectionElement.querySelector("div.image-slider"), sessionUser.observedReferences, self.toggleObservation);
+
+        var oldElement = mainElement.firstElementChild.nextElementSibling;
+        mainElement.replaceChild(sectionElement, oldElement);
+
+        var references = JSON.stringify(sessionUser.observedReferences);
+        var header = {"Content-Type": "application/json"};
+        var url = "/services/people/" + sessionUser.identity + "/peopleObserved";
+
+        de_sb_util.AJAX.invoke(url, "PUT", header, references, null, function (request) {
+            SUPER.prototype.displayStatus(request.status, request.statusText);
+        });
+
+    };
+
+    /**
+	 * Helper func, checks if person is in the observedreferences
+     * @param obsref - Array with observedReferences
+     * @param pid - the PersonIdentity
+     * @returns {boolean}
+     */
+    de_sb_messenger.PeopleController.prototype.contains = function (obsref, pid) {
+        var inArray = false;
+        obsref.map(function (key) {
+            if (key === pid) {
+                inArray = true;
+            }
+        });
+        return inArray;
+    };
 } ());
